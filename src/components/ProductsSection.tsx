@@ -1,11 +1,35 @@
-// components/ProductsSection.jsx
+// components/ProductsSection.tsx
 'use client'
 
 import { Button } from '@/components/ui/button'
 import { ArrowRight } from 'lucide-react'
 
+// Define product type
+type Product = {
+  id: number
+  name: string
+  description: string
+  features: string[]
+}
+
+// Define a union of possible category IDs
+type CategoryId = 'safes' | 'lockers' | 'printers'
+
+// Define category type
+type Category = {
+  id: CategoryId
+  label: string
+  description: string
+  image: string
+}
+
+// Define products with proper typing
+type ProductsMap = {
+  [K in CategoryId]: Product[]
+}
+
 const ProductsSection = () => {
-  const categories = [
+  const categories: Category[] = [
     {
       id: 'safes',
       label: 'Safes',
@@ -26,7 +50,7 @@ const ProductsSection = () => {
     },
   ]
 
-  const products = {
+  const products: ProductsMap = {
     safes: [
       {
         id: 1,

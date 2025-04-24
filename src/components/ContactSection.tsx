@@ -11,7 +11,7 @@ const ContactSection = () => {
         <div className='text-center mb-12'>
           <h2 className='text-3xl md:text-4xl font-bold mb-4'>Contact Us</h2>
           <p className='text-gray-600 max-w-2xl mx-auto'>
-            We're excited to meet you! Feel free to get in touch with us within our working hours.
+            {`We're excited to meet you! Feel free to get in touch with us within our working hours.`}
           </p>
         </div>
 
@@ -49,7 +49,7 @@ const ContactSection = () => {
             <div className='border-t border-red-600 pt-6' />
 
             <div className='mt-8 text-center'>
-              <p className='text-xl font-semibold mb-6'>Ready to connect with our team? Let's get started!</p>
+              <p className='text-xl font-semibold mb-6'>{`Ready to connect with our team? Let's get started!`}</p>
               <Link
                 href='/contact'
                 className='bg-white text-red-700 hover:bg-gray-100 px-8 py-2 rounded-md font-medium inline-flex items-center justify-center mx-auto transition-colors'
