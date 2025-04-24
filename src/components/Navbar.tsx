@@ -13,6 +13,7 @@ const Navbar: React.FC = () => {
   const [isProductsOpen, setIsProductsOpen] = useState<boolean>(false)
   const [hasScrolled, setHasScrolled] = useState<boolean>(false)
   const productsRef = useRef<HTMLDivElement>(null)
+  const mobileMenuRef = useRef<HTMLDivElement>(null)
   const isHomePage = pathname === '/'
 
   const toggleMenu = () => {
@@ -56,6 +57,35 @@ const Navbar: React.FC = () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [productsRef])
+
+  // Close mobile menu when clicking outside or pressing Escape key
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      // Check if the mobile menu is open and the click is outside of the menu and the toggle button
+      if (
+        isOpen &&
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target as Node) &&
+        !(event.target as Element)?.closest('button[aria-label="Toggle menu"]')
+      ) {
+        setIsOpen(false)
+      }
+    }
+
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        setIsOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleEscapeKey)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscapeKey)
+    }
+  }, [isOpen])
 
   // Determine navbar background style based on route and scroll position
   const getNavbarBackgroundClass = () => {
@@ -189,7 +219,7 @@ const Navbar: React.FC = () => {
 
       {/* Mobile menu */}
       {isOpen && (
-        <div className='md:hidden'>
+        <div className='md:hidden' ref={mobileMenuRef}>
           <div className='pt-2 pb-3 space-y-1'>
             <Link
               href='/about'

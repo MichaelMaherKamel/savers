@@ -1,5 +1,3 @@
-// app/page.jsx
-
 import HeroSection from '@/components/HeroSection'
 import ServicesSection from '@/components/ServicesSection'
 import ProductsSection from '@/components/ProductsSection'
