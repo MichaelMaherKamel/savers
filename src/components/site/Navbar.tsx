@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import SaversLogo from './SaversLogo'
+import { SaversLogo } from './SaversLogo'
 import { Menu, X, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { usePathname } from 'next/navigation'
@@ -255,7 +255,11 @@ const Navbar: React.FC = () => {
               Products
             </Link>
             <div className='pl-3 pr-4 py-2'>
-              <Button className='w-full bg-red-700 hover:bg-red-800'>Contact Us</Button>
+              <Link href={'/contact'}>
+                <Button onClick={toggleMenu} className='w-full bg-red-700 hover:bg-red-800'>
+                  Contact Us
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

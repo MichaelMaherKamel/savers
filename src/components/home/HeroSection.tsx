@@ -28,7 +28,10 @@ const HeroSection = () => {
   }, [])
 
   return (
-    <section id='hero' className='min-h-screen flex items-center w-full relative overflow-hidden py-12'>
+    <section
+      id='hero'
+      className='min-h-screen flex items-center w-full relative overflow-hidden py-20 md:py-12 lg:py-16'
+    >
       <div className='absolute inset-0 bg-gradient-to-r from-red-50 to-white z-0'></div>
       <div className='w-full max-w-screen-xl mx-auto px-4 relative z-10'>
         <div className='flex flex-col md:flex-row items-center justify-between gap-8'>
@@ -41,7 +44,7 @@ const HeroSection = () => {
                 <span className='text-red-700'>Document</span> <span>your success</span>
               </div>
             </h1>
-            <p className='text-lg text-muted-foreground mb-8 max-w-lg leading-relaxed text-center md:text-left sm:mx-auto md:mx-0'>
+            <p className='text-lg text-muted-foreground mb-0 md:mb-8 lg:mb-8 max-w-lg leading-relaxed text-center md:text-left sm:mx-auto md:mx-0 hidden md:block lg:block'>
               Premium safes, lockers, and printers with cutting-edge security features to protect your valuable assets
               and transform your office efficiency.
             </p>
