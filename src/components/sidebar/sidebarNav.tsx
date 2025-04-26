@@ -10,7 +10,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
+  // useSidebar,
 } from '@/components/ui/sidebar'
 
 export function NavDashboard({
@@ -23,7 +23,7 @@ export function NavDashboard({
   }[]
 }) {
   const pathname = usePathname()
-  const { isMobile } = useSidebar()
+  // const { isMobile } = useSidebar()
 
   return (
     <SidebarGroup>
