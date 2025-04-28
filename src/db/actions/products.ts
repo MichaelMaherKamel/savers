@@ -1,5 +1,4 @@
 'use server';
-
 import { db } from '..';
 import { products } from '../schema';
 import { revalidatePath } from 'next/cache';
@@ -53,12 +52,12 @@ export async function createProduct(input: CreateProductInput): Promise<Product>
     const [newProduct] = await db.insert(products).values({
       name: input.name,
       productDescription: input.productDescription,
+      category: input.category,
       image: input.image,
     }).returning();
-
     // Revalidate the products path to update any cached data
     revalidatePath('/products');
-    
+   
     return newProduct;
   } catch (error) {
     console.error('Error creating product:', error);
@@ -76,7 +75,6 @@ export async function updateProduct(id: number, input: UpdateProductInput): Prom
     if (!existingProduct) {
       return null;
     }
-
     const [updatedProduct] = await db.update(products)
       .set({
         ...input,
@@ -84,11 +82,10 @@ export async function updateProduct(id: number, input: UpdateProductInput): Prom
       })
       .where(eq(products.id, id))
       .returning();
-
     // Revalidate the products path to update any cached data
     revalidatePath('/products');
     revalidatePath(`/products/${id}`);
-    
+   
     return updatedProduct;
   } catch (error) {
     console.error(`Error updating product with ID ${id}:`, error);
@@ -106,12 +103,10 @@ export async function deleteProduct(id: number): Promise<boolean> {
     if (!existingProduct) {
       return false;
     }
-
     await db.delete(products).where(eq(products.id, id));
-
     // Revalidate the products path to update any cached data
     revalidatePath('/products');
-    
+   
     return true;
   } catch (error) {
     console.error(`Error deleting product with ID ${id}:`, error);
