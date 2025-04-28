@@ -21,9 +21,7 @@ export default function ProductsPage() {
   const [activeTab, setActiveTab] = useState('all')
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
-
-  // Categories for filtering
-
+  
   useEffect(() => {
     const fetchProducts = async () => {
       try {
