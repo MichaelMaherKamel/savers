@@ -23,8 +23,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true)
 
   // Categories for filtering
-  const categories = ['safes', 'lockers', 'printers']
-  
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
