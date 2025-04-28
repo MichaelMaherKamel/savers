@@ -6,11 +6,12 @@ import { ArrowLeft, Mail, Phone, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
-export default async function ProductPage({
-  params,
-}: {
-  params: { id: string };
+type Params = Promise<{ id: string }>;
+
+export default async function ProductPage(props: {
+  params: Params;
 }) {
+  const params = await props.params;
   const productId = parseInt(params.id);
   
   if (isNaN(productId)) {
