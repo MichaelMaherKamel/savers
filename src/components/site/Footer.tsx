@@ -42,14 +42,14 @@ const Footer = () => {
           </div>
 
           <div className='text-sm text-gray-900 flex items-center'>
-            Made with <Heart size={16} className='mx-1 text-red-600 fill-red-600' /> by{' '}
+             Designed by{' '}
             <Link
               href='https://michael.macrotech.dev/'
-              className='font-medium hover:text-red-600 transition-colors ml-1'
+              className='text-red-600 md:text-red-500 font-medium hover:text-red-600 transition-colors ml-1'
               target='_blank'
               rel='noopener noreferrer'
             >
-              Michael
+              Mike
             </Link>
           </div>
         </div>

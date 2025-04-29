@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 const HeroSection = () => {
   const [currentImage, setCurrentImage] = useState(0)
@@ -49,9 +50,11 @@ const HeroSection = () => {
               and transform your office efficiency.
             </p>
             <div className='hidden md:block md:text-left'>
-              <Button size='lg' className='bg-red-700 hover:bg-red-800 text-white w-full mb-12'>
+             <Link href={'/products'}>
+             <Button size='lg' className='bg-red-700 hover:bg-red-800 text-white w-full mb-12'>
                 Explore Products
               </Button>
+             </Link>
             </div>
           </div>
           <div className='w-full md:w-1/2'>

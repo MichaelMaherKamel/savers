@@ -15,7 +15,7 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ id, title, description, image, category }) => {
   return (
     <Link href={`/products/${id}`}>
-      <Card className='group h-full overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-red-100 border border-gray-100 hover:border-red-200'>
+      <Card className='group h-full overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-red-100 border border-gray-100 hover:border-red-200 '>
         <div className='relative aspect-[4/3] w-full bg-gray-50'>
           {image ? (
             <Image
