@@ -185,7 +185,8 @@ export default function ProductForm({
 
   // Update formData with current specifications
   const updateSpecificationsInFormData = () => {
-    const specs = {};
+    // FIX: Changed from empty object to Record<string, string> for proper type safety
+    const specs: Record<string, string> = {};
     
     specRows.forEach(row => {
       if (row.key.trim() !== '') {
