@@ -1,6 +1,6 @@
-import MarqueeDemo from '@/components/site/MarqueeTest'
 import { Building, Building2, HomeIcon } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 const OurClientsPage = () => {
   return (
@@ -43,17 +43,18 @@ const OurClientsPage = () => {
         </div>
       </div>
 
-      {/* Featured Clients */}
+      {/* Featured Clients - Photo Collage with adjusted aspect ratio */}
       <div className='mb-16'>
-        <h2 className='text-3xl font-bold text-gray-900 text-center mb-12'>Our Featured Clients</h2>
-        {/* <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8'>
-          {[1, 2, 3, 4, 5, 6].map((item) => (
-            <div key={item} className='h-24 bg-white rounded-md shadow-sm flex items-center justify-center'>
-              <div className='text-gray-400 font-semibold'>Client Logo</div>
-            </div>
-          ))}
-        </div> */}
-        <MarqueeDemo />
+        <h2 className='text-3xl font-bold text-gray-900 text-center'>Our Featured Clients</h2>
+        <div className='relative w-full aspect-[16/8] rounded-lg overflow-hidden shadow-md'>
+          <Image 
+            src="/pics/LogosAll.png" 
+            alt="Collage of our client logos" 
+            fill 
+            className='object-contain'
+            priority
+          />
+        </div>
       </div>
 
       {/* CTA Section - Updated with gradient background */}
