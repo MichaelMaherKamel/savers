@@ -1,6 +1,4 @@
 // components/ServicesSection.jsx
-'use client'
-
 import { SlidersHorizontal, Hammer, ShoppingCart, Key, Cog, Shield } from 'lucide-react'
 
 const ServicesSection = () => {

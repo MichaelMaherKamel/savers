@@ -50,7 +50,7 @@ const HeroSection = () => {
               and transform your office efficiency.
             </p>
             <div className='hidden md:block md:text-left'>
-             <Link href={'/products'}>
+             <Link href={'/products'} prefetch={true}>
              <Button size='lg' className='bg-red-700 hover:bg-red-800 text-white w-full mb-12'>
                 Explore Products
               </Button>
@@ -94,9 +94,11 @@ const HeroSection = () => {
 
         {/* Button below carousel on small screens */}
         <div className='md:hidden text-center mt-8'>
+          <Link href={'/products'} prefetch={true}>
           <Button size='lg' className='bg-red-700 hover:bg-red-800 text-white w-full'>
             Explore Products
           </Button>
+          </Link>
         </div>
       </div>
     </section>

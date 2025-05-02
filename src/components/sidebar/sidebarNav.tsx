@@ -1,16 +1,15 @@
 'use client'
-
 import { type LucideIcon } from 'lucide-react'
 import { usePathname } from 'next/navigation'
+import Link from 'next/link'
 import { cn } from '@/lib/utils'
-
 import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  // useSidebar,
+  useSidebar,
 } from '@/components/ui/sidebar'
 
 export function NavDashboard({
@@ -23,29 +22,41 @@ export function NavDashboard({
   }[]
 }) {
   const pathname = usePathname()
-  // const { isMobile } = useSidebar()
-
+  const { isMobile, closeMobileSidebar } = useSidebar()
+  
+  // Handle link click to close mobile sidebar if on mobile
+  const handleLinkClick = () => {
+    if (isMobile) {
+      closeMobileSidebar()
+    }
+  }
+  
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
       <SidebarMenu>
         {sections.map((item) => {
-          // Check if this link is active
-          const isActive = pathname === item.url || (item.url !== '/admin' && pathname?.startsWith(item.url))
-
+          // Fix the path checking logic
+          const isActive = 
+            item.url === '/admin' 
+              ? pathname === '/admin' || pathname === '/admin/' 
+              : pathname?.startsWith(item.url)
+              
           return (
             <SidebarMenuItem key={item.name}>
               <SidebarMenuButton
                 asChild
                 className={cn(
                   'cursor-pointer transition-colors',
-                  isActive ? 'bg-primary/10 text-primary shadow-sm' : 'hover:bg-muted/60'
+                  isActive 
+                    ? 'bg-red-100 text-red-600 shadow-sm' 
+                    : 'hover:bg-red-50 hover:text-red-500'
                 )}
               >
-                <a href={item.url}>
-                  <item.icon className={cn(isActive ? 'text-primary' : 'text-muted-foreground')} />
-                  <span className={cn(isActive ? 'font-medium' : '')}>{item.name}</span>
-                </a>
+                <Link href={item.url} onClick={handleLinkClick}>
+                  <item.icon className={cn(isActive ? 'text-red-600' : 'text-muted-foreground')} />
+                  <span className={cn(isActive ? 'font-medium text-red-600' : '')}>{item.name}</span>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           )

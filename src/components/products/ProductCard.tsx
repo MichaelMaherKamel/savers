@@ -30,11 +30,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ id, title, description, image
               <span className='text-gray-500'>No image available</span>
             </div>
           )}
-          <div className='absolute top-3 right-3'>
-            <span className='inline-flex items-center rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-200/50'>
-              {category}
-            </span>
-          </div>
         </div>
         <CardContent className='flex flex-col justify-between p-5 bg-white'>
           <div>

@@ -1,6 +1,4 @@
 // components/ContactSection.jsx
-'use client'
-
 import { Phone, Mail, MapPin, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
@@ -14,25 +12,27 @@ const ContactSection = () => {
             {`We're excited to meet you! Feel free to get in touch with us within our working hours.`}
           </p>
         </div>
-
-        <div className='max-w-3xl mx-auto'>
+        <div className='mx-auto'>
           <div className='bg-red-700 text-white rounded-xl p-8 shadow-lg'>
             <h3 className='text-2xl font-bold mb-6 text-center'>Get In Touch</h3>
-
             <div className='grid grid-cols-1 md:grid-cols-3 gap-8 mb-8'>
               <div className='flex flex-col items-center text-center'>
                 <Phone className='h-8 w-8 mb-3' />
                 <h4 className='font-semibold mb-1'>Phone</h4>
-                <p>+201288311421</p>
-                <p className='mt-1'>+20 1000775219</p>
+                <Link href="tel:+201288311421" className="hover:underline">
+                  +201288311421
+                </Link>
+                <Link href="tel:+201000775219" className="mt-1 hover:underline">
+                  +20 1000775219
+                </Link>
               </div>
-
               <div className='flex flex-col items-center text-center'>
                 <Mail className='h-8 w-8 mb-3' />
                 <h4 className='font-semibold mb-1'>Email</h4>
-                <p>savers@savers-eg.com</p>
+                <Link href="mailto:savers@savers-eg.com" className="hover:underline">
+                  savers@savers-eg.com
+                </Link>
               </div>
-
               <div className='flex flex-col items-center text-center'>
                 <MapPin className='h-8 w-8 mb-3' />
                 <h4 className='font-semibold mb-1'>Address</h4>
@@ -45,13 +45,12 @@ const ContactSection = () => {
                 </p>
               </div>
             </div>
-
             <div className='border-t border-red-600 pt-6' />
-
             <div className='mt-8 text-center'>
               <p className='text-xl font-semibold mb-6'>{`Ready to connect with our team? Let's get started!`}</p>
               <Link
                 href='/contact'
+                prefetch={true}
                 className='bg-white text-red-700 hover:bg-gray-100 px-8 py-2 rounded-md font-medium inline-flex items-center justify-center mx-auto transition-colors'
               >
                 <span>View More Details</span>

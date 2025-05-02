@@ -40,6 +40,7 @@ type SidebarContextProps = {
   setOpenMobile: (open: boolean) => void
   isMobile: boolean
   toggleSidebar: () => void
+  closeMobileSidebar: () => void // Added function to close mobile sidebar
 }
 
 const SidebarContext = React.createContext<SidebarContextProps | null>(null)
@@ -93,6 +94,13 @@ function SidebarProvider({
     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open)
   }, [isMobile, setOpen, setOpenMobile])
 
+  // Helper specifically to close the mobile sidebar
+  const closeMobileSidebar = React.useCallback(() => {
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+  }, [isMobile])
+
   // Adds a keyboard shortcut to toggle the sidebar.
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -122,8 +130,9 @@ function SidebarProvider({
       openMobile,
       setOpenMobile,
       toggleSidebar,
+      closeMobileSidebar, // Add the new function to the context
     }),
-    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar, closeMobileSidebar]
   )
 
   return (
@@ -187,7 +196,7 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
+          className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden transition-transform duration-300 ease-in-out"
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
@@ -502,6 +511,7 @@ function SidebarMenuButton({
   size = "default",
   tooltip,
   className,
+  onClick,
   ...props
 }: React.ComponentProps<"button"> & {
   asChild?: boolean
@@ -509,7 +519,19 @@ function SidebarMenuButton({
   tooltip?: string | React.ComponentProps<typeof TooltipContent>
 } & VariantProps<typeof sidebarMenuButtonVariants>) {
   const Comp = asChild ? Slot : "button"
-  const { isMobile, state } = useSidebar()
+  const { isMobile, state, closeMobileSidebar } = useSidebar()
+
+  // Handle click events to close mobile sidebar when appropriate
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (onClick) {
+      onClick(event)
+    }
+    
+    // Close mobile sidebar if we're on mobile
+    if (isMobile) {
+      closeMobileSidebar()
+    }
+  }
 
   const button = (
     <Comp
@@ -517,6 +539,7 @@ function SidebarMenuButton({
       data-sidebar="menu-button"
       data-size={size}
       data-active={isActive}
+      onClick={handleClick}
       className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
       {...props}
     />
@@ -671,6 +694,7 @@ function SidebarMenuSubButton({
   size = "md",
   isActive = false,
   className,
+  onClick,
   ...props
 }: React.ComponentProps<"a"> & {
   asChild?: boolean
@@ -678,6 +702,19 @@ function SidebarMenuSubButton({
   isActive?: boolean
 }) {
   const Comp = asChild ? Slot : "a"
+  const { isMobile, closeMobileSidebar } = useSidebar()
+
+  // Handle click events to close mobile sidebar when appropriate
+  const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (onClick) {
+      onClick(event)
+    }
+    
+    // Close mobile sidebar if we're on mobile
+    if (isMobile) {
+      closeMobileSidebar()
+    }
+  }
 
   return (
     <Comp
@@ -685,6 +722,7 @@ function SidebarMenuSubButton({
       data-sidebar="menu-sub-button"
       data-size={size}
       data-active={isActive}
+      onClick={handleClick}
       className={cn(
         "text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground [&>svg]:text-sidebar-accent-foreground flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 outline-hidden focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
         "data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground",
