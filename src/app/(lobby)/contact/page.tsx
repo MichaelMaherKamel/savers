@@ -1,6 +1,6 @@
 import React from 'react'
-import { Mail, Phone, MapPin } from 'lucide-react'
 import Link from 'next/link'
+import { Mail, Phone, MapPin } from 'lucide-react'
 
 const ContactUsPage = () => {
   return (
@@ -26,8 +26,13 @@ const ContactUsPage = () => {
               </div>
               <div className='ml-4'>
                 <p className='text-lg font-medium text-gray-900'>Phone</p>
-                <p className='text-gray-600'>+201288311421</p>
-                <p className='text-gray-600'>+20 1000775219</p>
+                <Link href="tel:+201288311421" className="hover:underline text-gray-600">
+                  +201288311421
+                </Link>
+                <br />
+                <Link href="tel:+201000775219" className="hover:underline text-gray-600">
+                  +20 1000775219
+                </Link>
               </div>
             </div>
 
@@ -37,7 +42,9 @@ const ContactUsPage = () => {
               </div>
               <div className='ml-4'>
                 <p className='text-lg font-medium text-gray-900'>Email</p>
-                <p className='text-gray-600'>savers@savers-eg.com</p>
+                <Link href="mailto:savers@savers-eg.com" className="hover:underline text-gray-600">
+                  savers@savers-eg.com
+                </Link>
               </div>
             </div>
 
