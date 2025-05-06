@@ -5,7 +5,8 @@ import { CreateCategoryButton } from "@/components/categories/createCategoryButt
 
 export default async function AdminCategoriesPage() {
   const { categories = [], error } = await getCategories();
- 
+console.log(categories)
+console.log(error)
   return (
     <div className="container py-10">
       <div className="flex justify-between items-center mb-8">

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Category } from "@/db/schema";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash, MoreHorizontal } from "lucide-react";
 import { CategoryDialog } from "@/components/categories/categoryDialog";
@@ -120,7 +120,7 @@ export function CategoriesGrid({ initialCategories }: CategoriesGridProps) {
               </div>
             </CardContent>
           </Card>
-        )).reverse()}
+        ))}
       </div>
 
       {/* Edit Dialog */}

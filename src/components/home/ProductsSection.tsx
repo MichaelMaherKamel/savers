@@ -57,7 +57,7 @@ const ProductsSection = async () => {
                   </Link>
                 </div>
               </div>
-          )).reverse()}
+          ))}
         </div>
       </div>
     </section>

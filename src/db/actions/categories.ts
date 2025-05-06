@@ -56,7 +56,6 @@ export const getCategories = unstable_cache(
     try {
       const allCategories = await db.select()
         .from(categories)
-        .orderBy(categories.name)
         .execute();
       
       return { categories: allCategories };
