@@ -40,9 +40,17 @@ export async function uploadImageToSupabase(
     // Delete existing image if present
     if (currentImageUrl) {
       try {
-        const oldFileName = currentImageUrl.split('/').pop()
-        if (oldFileName) {
-          await supabase.storage.from('saversbucket').remove([`${folder}/${oldFileName}`])
+        const urlParts = currentImageUrl.split('/')
+        const bucketIndex = urlParts.findIndex(part => part === 'saversbucket')
+        
+        if (bucketIndex !== -1 && bucketIndex < urlParts.length - 1) {
+          // Extract path after bucket name
+          const pathParts = urlParts.slice(bucketIndex + 1)
+          const oldPath = pathParts.join('/')
+          
+          if (oldPath) {
+            await supabase.storage.from('saversbucket').remove([oldPath])
+          }
         }
       } catch (error) {
         console.warn('Failed to delete old file:', error)
@@ -76,9 +84,16 @@ export async function uploadImageToSupabase(
           data: { publicUrl },
         } = supabase.storage.from('saversbucket').getPublicUrl(data.path)
 
-        // If a path was provided, revalidate it
+        // Revalidate relevant paths
         if (options?.path) {
           revalidatePath(options.path)
+        }
+        
+        // Always revalidate critical paths for categories
+        if (folder === 'categories') {
+          revalidatePath('/admin/categories')
+          revalidatePath('/')
+          revalidatePath('/products')
         }
 
         return {
@@ -128,8 +143,16 @@ export async function deleteImages(
 
     const filesToDelete = imageUrls
       .map((url) => {
-        const fileName = url.split('/').pop()
-        return fileName ? `${folder}/${fileName}` : null
+        const urlParts = url.split('/')
+        const bucketIndex = urlParts.findIndex(part => part === 'saversbucket')
+        
+        if (bucketIndex !== -1 && bucketIndex < urlParts.length - 1) {
+          // Extract path after bucket name
+          const pathParts = urlParts.slice(bucketIndex + 1)
+          return pathParts.join('/')
+        }
+        
+        return null
       })
       .filter((path): path is string => path !== null)
 
@@ -147,9 +170,16 @@ export async function deleteImages(
       }
     }
 
-    // If a path was provided, revalidate it
+    // Revalidate paths
     if (path) {
       revalidatePath(path)
+    }
+    
+    // Always revalidate critical paths for categories
+    if (folder === 'categories') {
+      revalidatePath('/admin/categories')
+      revalidatePath('/')
+      revalidatePath('/products')
     }
 
     return { success: true }

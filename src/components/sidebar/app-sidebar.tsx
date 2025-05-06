@@ -1,6 +1,6 @@
 'use client'
 import type * as React from 'react'
-import { Boxes, LayoutDashboard, Users } from 'lucide-react'
+import { Boxes, LayoutDashboard, Users, Tags } from 'lucide-react'
 import { NavDashboard } from './sidebarNav'
 import { NavUser } from './nav-user'
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from '@/components/ui/sidebar'
@@ -23,6 +23,11 @@ const dashboardData = {
       name: 'Dashboard',
       url: '/admin',
       icon: LayoutDashboard,
+    },
+    {
+      name: 'Categories',
+      url: '/admin/categories',
+      icon: Tags,
     },
     {
       name: 'Products',

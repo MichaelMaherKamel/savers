@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ImageUpload } from "./ImageUpload";
+import { ImageUpload } from "../site/ImageUpload";
 import { ChevronLeft, ChevronRight, Save, X, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";

@@ -21,6 +21,7 @@ type ImageUploadProps = {
   folder?: string;
   currentImageUrl?: string;
   onUploadComplete?: (url: string) => void;
+  onUploadStart?: () => void;
   path?: string;
 }
  
@@ -28,9 +29,11 @@ export function ImageUpload({
   folder = "images",
   currentImageUrl,
   onUploadComplete,
+  onUploadStart,
   path
 }: ImageUploadProps) {
   const [files, setFiles] = React.useState<File[]>([]);
+  const [isUploading, setIsUploading] = React.useState(false);
  
   const onUpload = React.useCallback(
     async (
@@ -46,6 +49,12 @@ export function ImageUpload({
       },
     ) => {
       try {
+        // Set uploading state and notify parent component
+        setIsUploading(true);
+        if (onUploadStart) {
+          onUploadStart();
+        }
+        
         // Process each file individually
         const uploadPromises = files.map(async (file) => {
           try {
@@ -116,9 +125,12 @@ export function ImageUpload({
         toast.error("Upload process failed", {
           description: "There was an unexpected error during the upload process.",
         });
+      } finally {
+        // Reset uploading state when done, regardless of outcome
+        setIsUploading(false);
       }
     },
-    [folder, currentImageUrl, onUploadComplete, path],
+    [folder, currentImageUrl, onUploadComplete, onUploadStart, path],
   );
  
   const onFileReject = React.useCallback((file: File, message: string) => {
@@ -133,10 +145,11 @@ export function ImageUpload({
       onValueChange={setFiles}
       maxFiles={10}
       maxSize={5 * 1024 * 1024}
-      accept="image/*" // Fixed: Changed to string format instead of object
+      accept="image/*"
       className="w-full max-w-md"
       onUpload={onUpload}
       onFileReject={onFileReject}
+      disabled={isUploading}
       multiple
     >
       <FileUploadDropzone>
@@ -150,7 +163,12 @@ export function ImageUpload({
           </p>
         </div>
         <FileUploadTrigger asChild>
-          <Button variant="outline" size="sm" className="mt-2 w-fit">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="mt-2 w-fit"
+            disabled={isUploading}
+          >
             Browse images
           </Button>
         </FileUploadTrigger>
@@ -167,6 +185,7 @@ export function ImageUpload({
                 variant="secondary"
                 size="icon"
                 className="-top-1 -right-1 absolute size-5 rounded-full"
+                disabled={isUploading}
               >
                 <X className="size-3" />
               </Button>

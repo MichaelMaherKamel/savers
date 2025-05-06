@@ -1,6 +1,6 @@
 'use client'
 
-import { ImageUpload } from "@/components/products/ImageUpload";
+import { ImageUpload } from "@/components/site/ImageUpload";
 
 export default function YourPage() {
   const handleUploadComplete = (imageUrl: string) => {

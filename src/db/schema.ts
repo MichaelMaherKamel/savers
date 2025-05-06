@@ -1,8 +1,8 @@
-import { integer, pgTable, text, varchar, timestamp, boolean } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { integer, pgTable, text, varchar, timestamp, boolean, json } from "drizzle-orm/pg-core";
 
 
 //Auth Tables
-
 export const user = pgTable("user", {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
@@ -59,13 +59,43 @@ export const verification = pgTable("verification", {
 });
 
 
-// Products Table
-export const products = pgTable("products", {
+// Categories Table
+export const categories = pgTable("categories", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  name: varchar({ length: 255 }).notNull(),
-  productDescription: text('productDescription').notNull(),
-  category: varchar({ length: 255 }).notNull(),
+  name: varchar({ length: 255 }).notNull().unique(),
   image: text('image').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
+
+// Define the Category type based on the schema
+export type Category = typeof categories.$inferSelect;
+
+
+// Products Table
+export const products = pgTable("products", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar({ length: 255 }).notNull(),
+  model: varchar({ length: 255 }),
+  description: text('description').notNull(),
+  categoryId: integer().references(() => categories.id, { onDelete: 'cascade' }).notNull(),
+  keyFeatures: json('key_features').$type<string[]>().default([]).notNull(),
+  specifications: json('specifications').$type<Record<string, string>>().default({}).notNull(),
+  image: text('image').notNull(),
+  brochureUrl: text('brochure_url'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+
+// Establish relations between Categories and Products
+export const categoriesRelations = relations(categories, ({ many }) => ({
+  products: many(products),
+}));
+
+export const productsRelations = relations(products, ({ one }) => ({
+  category: one(categories, {
+    fields: [products.categoryId],
+    references: [categories.id],
+  }),
+}));
