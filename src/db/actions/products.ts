@@ -5,13 +5,17 @@ import { revalidatePath } from 'next/cache';
 import { eq, ne, and } from 'drizzle-orm';
 import { unstable_cache } from 'next/cache';
 
-// Type definitions for product
+// Updated Type definitions for product based on the new schema
 type Product = {
   id: number;
   name: string;
-  productDescription: string;
-  category: string;
+  model: string | null;
+  description: string;
+  categoryId: number;
+  keyFeatures: string[];
+  specifications: Record<string, string>;
   image: string;
+  brochureUrl: string | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -43,26 +47,19 @@ export const getAllProducts = unstable_cache(
 );
 
 /**
- * Get products by Category (cached for 1 minute)
+ * Get products by Category ID (cached for 1 minute)
  */
 export const getProductsByCategory = unstable_cache(
-  async (category: string): Promise<Product[]> => {
+  async (categoryId: number): Promise<Product[]> => {
     try {
-      // Convert the provided category to lowercase
-      const normalizedCategory = category.toLowerCase();
+      const categoryProducts = await db.select()
+        .from(products)
+        .where(eq(products.categoryId, categoryId));
       
-      // Fetch all products
-      const allProducts = await db.select().from(products);
-      
-      // Filter products by case-insensitive category matching
-      const matchedProducts = allProducts.filter(product => 
-        product.category.toLowerCase() === normalizedCategory
-      );
-      
-      return matchedProducts;
+      return categoryProducts;
     } catch (error) {
-      console.error(`Error fetching products with category ${category}:`, error);
-      throw new Error(`Failed to fetch products with category ${category}`);
+      console.error(`Error fetching products with category ID ${categoryId}:`, error);
+      throw new Error(`Failed to fetch products with category ID ${categoryId}`);
     }
   },
   ['products-by-category'], // Cache tag prefix
@@ -91,39 +88,42 @@ export const getProductById = unstable_cache(
  * Returns up to 3 similar products (cached for 1 minute)
  */
 export const getSimilarProducts = unstable_cache(
-  async (productId: number, category: string, limit: number = 3): Promise<Product[]> => {
+  async (productId: number, categoryId: number, limit: number = 3): Promise<Product[]> => {
     try {
-      // Convert the provided category to lowercase
-      const normalizedCategory = category.toLowerCase();
-      
-      // Fetch all products
-      const allProducts = await db.select().from(products);
-      
-      // Filter products by case-insensitive category matching and exclude current product
-      const similarProducts = allProducts.filter(product => 
-        product.category.toLowerCase() === normalizedCategory && 
-        product.id !== productId
-      );
+      // Get products from the same category, excluding the current product
+      const sameCategoryProducts = await db.select()
+        .from(products)
+        .where(
+          and(
+            eq(products.categoryId, categoryId),
+            ne(products.id, productId)
+          )
+        );
       
       // If not enough products in the same category, get products from other categories
-      if (similarProducts.length < limit) {
-        const otherProducts = allProducts.filter(product => 
-          product.category.toLowerCase() !== normalizedCategory && 
-          product.id !== productId
-        );
+      if (sameCategoryProducts.length < limit) {
+        const otherProducts = await db.select()
+          .from(products)
+          .where(
+            and(
+              ne(products.categoryId, categoryId),
+              ne(products.id, productId)
+            )
+          )
+          .limit(limit - sameCategoryProducts.length);
         
-        // Combine and limit the results
-        return [...similarProducts, ...otherProducts].slice(0, limit);
+        // Combine the results
+        return [...sameCategoryProducts, ...otherProducts];
       }
       
       // Return a random selection if we have more than the limit
-      if (similarProducts.length > limit) {
+      if (sameCategoryProducts.length > limit) {
         // Shuffle the array to get random products
-        const shuffled = [...similarProducts].sort(() => 0.5 - Math.random());
+        const shuffled = [...sameCategoryProducts].sort(() => 0.5 - Math.random());
         return shuffled.slice(0, limit);
       }
       
-      return similarProducts;
+      return sameCategoryProducts;
     } catch (error) {
       console.error(`Error fetching similar products for product ID ${productId}:`, error);
       throw new Error(`Failed to fetch similar products for product ID ${productId}`);
@@ -140,9 +140,13 @@ export async function createProduct(input: CreateProductInput): Promise<Product>
   try {
     const [newProduct] = await db.insert(products).values({
       name: input.name,
-      productDescription: input.productDescription,
-      category: input.category,
+      model: input.model,
+      description: input.description,
+      categoryId: input.categoryId,
+      keyFeatures: input.keyFeatures,
+      specifications: input.specifications,
       image: input.image,
+      brochureUrl: input.brochureUrl,
     }).returning();
     
     // Revalidate cache and paths

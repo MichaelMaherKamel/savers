@@ -14,6 +14,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import ProductCard from "@/components/products/ProductCard"
+import { getCategoryById } from "@/db/actions/categories"
 
 type Params = Promise<{ id: string }>
 
@@ -190,25 +191,26 @@ async function ProductDetails({ productId }: { productId: number }) {
     return <ProductErrorPage errorType="notfound" />
   }
   
-  // Determine category based on product name
-  let category = "Product"
-  const name = product.name.toLowerCase()
-  if (name.includes("safe")) category = "Safes"
-  else if (name.includes("lock")) category = "Lockers"
-  else if (name.includes("print")) category = "Printers"
+  // Fetch the category name from the database
+  const categoryResponse = await getCategoryById(product.categoryId);
+  const categoryName = categoryResponse.category ? categoryResponse.category.name : "Product";
+  
+  // Fetch similar products based on the product's categoryId
+  const similarProducts = await getSimilarProducts(productId, product.categoryId, 3);
 
-  // Fetch similar products based on the product's category
-  const similarProducts = await getSimilarProducts(productId, product.category || category, 3);
-
-  // Product specifications
-  const specifications = [
-    { name: "Dimensions", value: "60 × 40 × 30 cm" },
-    { name: "Weight", value: "25 kg" },
-    { name: "Material", value: "Steel, Reinforced" },
-    { name: "Warranty", value: "5 years" },
-    { name: "Security Rating", value: "Level 2" },
-    { name: "Lock Type", value: "Digital + Key" },
-  ]
+  // Product specifications - use the actual product specifications from the database if available
+  const productSpecs = product.specifications || {};
+  const specifications = Object.entries(productSpecs).map(([name, value]) => ({ name, value }));
+  
+  // If there are no specifications in the database, show some defaults
+  if (specifications.length === 0) {
+    specifications.push(
+      { name: "Dimensions", value: "60 × 40 × 30 cm" },
+      { name: "Weight", value: "25 kg" },
+      { name: "Material", value: "Steel, Reinforced" },
+      { name: "Warranty", value: "5 years" }
+    );
+  }
 
   return (
     <div className="mb-16">
@@ -234,6 +236,9 @@ async function ProductDetails({ productId }: { productId: number }) {
               <div className="sticky top-24">
                 <div className="mb-6">
                   <h1 className="text-3xl font-bold text-red-600">{product.name}</h1>
+                  {product.model && (
+                    <p className="text-gray-600 mt-1">Model: {product.model}</p>
+                  )}
                 </div>
 
                 <Tabs defaultValue="description" className="mb-8">
@@ -272,56 +277,63 @@ async function ProductDetails({ productId }: { productId: number }) {
 
                   <TabsContent value="description" className="pt-6">
                     <div className="prose max-w-none text-gray-700">
-                      <p>
-                        {product.productDescription || ""} Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui
-                        mauris. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend
-                        nibh porttitor.
-                      </p>
-                      <p>
-                        Suspendisse dictum feugiat nisl ut dapibus. Mauris iaculis porttitor posuere. Praesent id metus massa, ut
-                        blandit odio. Proin quis tortor orci. Etiam at risus et justo dignissim congue.
-                      </p>
+                      <p>{product.description}</p>
                     </div>
                   </TabsContent>
 
                   <TabsContent value="features" className="pt-6">
                     <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-                      <li className="flex items-start">
-                        <div className="flex-shrink-0 h-6 w-6 rounded-full bg-red-100 flex items-center justify-center mr-3">
-                          <span className="text-red-600 text-xs">✓</span>
-                        </div>
-                        <span>High-quality materials</span>
-                      </li>
-                      <li className="flex items-start">
-                        <div className="flex-shrink-0 h-6 w-6 rounded-full bg-red-100 flex items-center justify-center mr-3">
-                          <span className="text-red-600 text-xs">✓</span>
-                        </div>
-                        <span>Professional installation</span>
-                      </li>
-                      <li className="flex items-start">
-                        <div className="flex-shrink-0 h-6 w-6 rounded-full bg-red-100 flex items-center justify-center mr-3">
-                          <span className="text-red-600 text-xs">✓</span>
-                        </div>
-                        <span>Extended warranty options</span>
-                      </li>
-                      <li className="flex items-start">
-                        <div className="flex-shrink-0 h-6 w-6 rounded-full bg-red-100 flex items-center justify-center mr-3">
-                          <span className="text-red-600 text-xs">✓</span>
-                        </div>
-                        <span>Maintenance service plans</span>
-                      </li>
-                      <li className="flex items-start">
-                        <div className="flex-shrink-0 h-6 w-6 rounded-full bg-red-100 flex items-center justify-center mr-3">
-                          <span className="text-red-600 text-xs">✓</span>
-                        </div>
-                        <span>24/7 customer support</span>
-                      </li>
-                      <li className="flex items-start">
-                        <div className="flex-shrink-0 h-6 w-6 rounded-full bg-red-100 flex items-center justify-center mr-3">
-                          <span className="text-red-600 text-xs">✓</span>
-                        </div>
-                        <span>Customization options</span>
-                      </li>
+                      {product.keyFeatures && product.keyFeatures.length > 0 ? (
+                        // Display actual key features from the database
+                        product.keyFeatures.map((feature, index) => (
+                          <li key={index} className="flex items-start">
+                            <div className="flex-shrink-0 h-6 w-6 rounded-full bg-red-100 flex items-center justify-center mr-3">
+                              <span className="text-red-600 text-xs">✓</span>
+                            </div>
+                            <span>{feature}</span>
+                          </li>
+                        ))
+                      ) : (
+                        // Fallback to default features
+                        <>
+                          <li className="flex items-start">
+                            <div className="flex-shrink-0 h-6 w-6 rounded-full bg-red-100 flex items-center justify-center mr-3">
+                              <span className="text-red-600 text-xs">✓</span>
+                            </div>
+                            <span>High-quality materials</span>
+                          </li>
+                          <li className="flex items-start">
+                            <div className="flex-shrink-0 h-6 w-6 rounded-full bg-red-100 flex items-center justify-center mr-3">
+                              <span className="text-red-600 text-xs">✓</span>
+                            </div>
+                            <span>Professional installation</span>
+                          </li>
+                          <li className="flex items-start">
+                            <div className="flex-shrink-0 h-6 w-6 rounded-full bg-red-100 flex items-center justify-center mr-3">
+                              <span className="text-red-600 text-xs">✓</span>
+                            </div>
+                            <span>Extended warranty options</span>
+                          </li>
+                          <li className="flex items-start">
+                            <div className="flex-shrink-0 h-6 w-6 rounded-full bg-red-100 flex items-center justify-center mr-3">
+                              <span className="text-red-600 text-xs">✓</span>
+                            </div>
+                            <span>Maintenance service plans</span>
+                          </li>
+                          <li className="flex items-start">
+                            <div className="flex-shrink-0 h-6 w-6 rounded-full bg-red-100 flex items-center justify-center mr-3">
+                              <span className="text-red-600 text-xs">✓</span>
+                            </div>
+                            <span>24/7 customer support</span>
+                          </li>
+                          <li className="flex items-start">
+                            <div className="flex-shrink-0 h-6 w-6 rounded-full bg-red-100 flex items-center justify-center mr-3">
+                              <span className="text-red-600 text-xs">✓</span>
+                            </div>
+                            <span>Customization options</span>
+                          </li>
+                        </>
+                      )}
                     </ul>
                   </TabsContent>
 
@@ -360,16 +372,19 @@ async function ProductDetails({ productId }: { productId: number }) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {similarProducts.length > 0 ? (
-            similarProducts.map((item) => (
-              <ProductCard
-                key={item.id.toString()}
-                id={item.id.toString()}
-                title={item.name}
-                description={item.productDescription}
-                image={item.image || "/placeholder.svg"}
-                category={item.category}
-              />
-            ))
+            similarProducts.map((item) => {
+              // For each similar product, fetch its category
+              return (
+                <ProductCard
+                  key={item.id.toString()}
+                  id={item.id.toString()}
+                  title={item.name}
+                  description={item.description}
+                  image={item.image || "/placeholder.svg"}
+                  category={item.categoryId}
+                />
+              );
+            })
           ) : (
             <div className="col-span-3 text-center py-8 bg-gray-50 rounded-lg">
               <Package size={48} className="mx-auto text-gray-400 mb-4" />
@@ -379,9 +394,8 @@ async function ProductDetails({ productId }: { productId: number }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
-
 // Error page component
 function ProductErrorPage({ errorType }: { errorType: 'invalid' | 'notfound' }) {
   const title = errorType === 'invalid' ? 'Invalid Product ID' : 'Product Not Found'
