@@ -1,36 +1,183 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Savers - Corporate Portfolio
 
-## Getting Started
+![Savers Logo](https://cihkzrmbfdbfnbmzslya.supabase.co/storage/v1/object/public/saversbucket//SaversLogo.png)
 
-First, run the development server:
+## 📋 Overview
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Savers is a corporate portfolio website showcasing products and services for a company specializing in Printers, Safes, and Lockers. This modern web application is built with a robust tech stack including Next.js 15, TypeScript, and Tailwind CSS to deliver a seamless and responsive user experience.
+
+## 🚀 Features
+
+- **Product Showcase** - Comprehensive display of printer models, safes, and locker systems
+- **Service Information** - Detailed descriptions of installation, maintenance, and support services
+- **Company Profile** - Information about Savers' history, mission, and expertise
+- **Responsive Design** - Optimized viewing experience across all device sizes
+- **Authentication System** - Secure user authentication powered by Better-Auth and Supabase
+- **Database Integration** - Robust data management with PostgreSQL and Drizzle ORM
+
+## 💻 Tech Stack
+
+- **Frontend Framework**: [Next.js 15](https://nextjs.org/) with App Router and TurboPack
+- **UI Components**: [shadcn/ui](https://ui.shadcn.com/) & [Radix UI](https://www.radix-ui.com/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) with tailwind-merge and tw-animate-css
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Database**: [PostgreSQL](https://www.postgresql.org/) with [Supabase](https://supabase.com/)
+- **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
+- **Authentication**: [Better-Auth](https://github.com/better-auth/better-auth) with Supabase
+- **Form Handling**: React Hook Form with Zod validation
+- **Runtime & Package Manager**: [Bun](https://bun.sh/)
+- **UI Icons**: [Lucide React](https://lucide.dev/)
+- **Toast Notifications**: [Sonner](https://sonner.emilkowal.ski/)
+
+## 🛠️ Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18 or later)
+- [Bun](https://bun.sh/) (recommended) or npm/yarn/pnpm
+- [PostgreSQL](https://www.postgresql.org/) database (or Supabase account)
+
+### Environment Setup
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# Database
+DATABASE_URL=your_postgres_connection_string
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/MichaelMaherKamel/savers.git
+   cd savers
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. Install dependencies:
+   ```bash
+   bun install
+   # or
+   npm install
+   ```
 
-## Learn More
+3. Set up the database:
+   ```bash
+   bun drizzle-kit push
+   # or
+   npx drizzle-kit push
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+4. Run the development server:
+   ```bash
+   bun dev
+   # or
+   npm run dev
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📦 Project Structure
 
-## Deploy on Vercel
+```
+├───public
+│   └───pics
+└───src
+    ├───app
+    │   ├───(admin)
+    │   │   └───admin
+    │   │       ├───categories
+    │   │       ├───clients
+    │   │       └───products
+    │   │           ├───new
+    │   │           └───[id]
+    │   ├───(api)
+    │   │   └───api
+    │   │       └───auth
+    │   │           └───[...all]
+    │   ├───(auth)
+    │   │   └───auth
+    │   └───(lobby)
+    │       ├───about
+    │       ├───clients
+    │       ├───contact
+    │       ├───products
+    │       │   └───[id]
+    │       ├───profile
+    │       └───test
+    ├───components
+    │   ├───auth
+    │   ├───categories
+    │   ├───home
+    │   ├───products
+    │   ├───sidebar
+    │   ├───site
+    │   └───ui
+    ├───db
+    │   └───actions
+    ├───hooks
+    └───lib
+        ├───better-auth
+        └───supabase
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🔄 Database Management
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project uses Drizzle ORM with PostgreSQL. You can manage your database schema in `lib/db/schema.ts` and run migrations using the following commands:
+
+```bash
+# Generate migration
+bun drizzle-kit generate
+
+# Apply migration to the database
+bun drizzle-kit push
+```
+
+## 🚢 Deployment
+
+The recommended way to deploy this application is using [Vercel](https://vercel.com), the platform from the creators of Next.js:
+
+1. Push your code to a GitHub repository
+2. Import the project into Vercel
+3. Configure your environment variables
+4. Deploy
+
+Alternatively, you can follow the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for other deployment options.
+
+## 🧪 Development
+
+```bash
+# Run linting
+bun lint
+# or
+npm run lint
+
+# Build for production
+bun build
+# or
+npm run build
+
+# Start production server
+bun start
+# or
+npm run start
+```
+
+## 📄 License
+
+[MIT](LICENSE)
+
+
+
+## 📞 Contact
+
+Visit us at [https://savers-delta.vercel.app/](https://savers-delta.vercel.app/)
+
+---
+
+Built with ❤️ By [Michael](https://michael.macrotech.dev/)
