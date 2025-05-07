@@ -1,9 +1,9 @@
 'use server';
 
 import { db } from "@/db";
-import { categories } from "@/db/schema";
+import { categories, Category } from "@/db/schema";
 import { revalidatePath, unstable_cache } from "next/cache";
-import { eq, like } from "drizzle-orm";
+import { asc, eq, like } from "drizzle-orm";
 
 /**
  * Create a new category
@@ -32,9 +32,9 @@ export async function createCategory(name: string, image: string) {
       .execute();
     
     // // Revalidate paths to update UI
-    // revalidatePath('/admin/categories');
-    // revalidatePath('/');
-    // revalidatePath('/products');
+     revalidatePath('/admin/categories');
+     revalidatePath('/');
+     revalidatePath('/products');
     
     return { category: newCategory[0] };
   } catch (error: any) {
@@ -52,16 +52,12 @@ export async function createCategory(name: string, image: string) {
  * Get all categories
  */
 export const getCategories = unstable_cache(
-  async () => {
+  async (): Promise<Category[]> => {
     try {
-      const allCategories = await db.select()
-        .from(categories)
-        .execute();
-      
-      return { categories: allCategories };
+      return await db.select().from(categories).orderBy(asc(categories.id));
     } catch (error) {
       console.error("Failed to fetch categories:", error);
-      return { error: "Failed to fetch categories" };
+      throw new Error("Failed to fetch categories");
     }
   },
   ['all-categories'], // Cache tag

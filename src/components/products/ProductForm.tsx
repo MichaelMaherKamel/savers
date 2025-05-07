@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ImageUpload } from "../site/ImageUpload";
-import { ChevronLeft, ChevronRight, Save, X, Plus, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Save, X, Plus, Trash2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -17,7 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Product } from "./ProductsList";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -26,31 +25,41 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { adminCreateProduct, adminUpdateProduct } from "@/db/actions/products";
+import { Category } from "@/db/schema";
+
+// Define product interface based on the database schema
+interface Product {
+  id: number;
+  name: string;
+  model: string | null;
+  description: string;
+  categoryId: number;
+  keyFeatures: string[];
+  specifications: Record<string, string>;
+  image: string;
+  brochureUrl: string | null;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+// Form data without IDs and timestamps
+type ProductFormData = Omit<Product, 'id' | 'createdAt' | 'updatedAt'>;
 
 interface ProductFormProps {
   initialData?: Product;
+  categories: Category[];
+  productId?: number;
   isEditing?: boolean;
-  onCancel?: () => void;
-  onSave?: (product: Product) => void;
 }
-
-const emptyProduct: Product = {
-  id: "",
-  name: "",
-  model: "",
-  category: "Printers",
-  description: "",
-  keyFeatures: [],
-  specifications: {},
-  imageUrls: []
-};
 
 // Step definition
 type Step = {
   title: string;
 };
 
-// Define steps (removed description property)
+// Define steps
 const steps: Step[] = [
   { title: "General Information" },
   { title: "Features & Specifications" },
@@ -66,21 +75,50 @@ interface SpecRow {
 
 export default function ProductForm({ 
   initialData, 
+  categories,
+  productId,
   isEditing = false,
-  onCancel,
-  onSave
 }: ProductFormProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  // Removed loading state as it's not needed
-  const [formData, setFormData] = useState<Product>(initialData || emptyProduct);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const router = useRouter();
+  
+  // Initialize with empty data or provided data
+  const [formData, setFormData] = useState<ProductFormData>(() => {
+    if (initialData) {
+      return {
+        name: initialData.name,
+        model: initialData.model,
+        description: initialData.description,
+        categoryId: initialData.categoryId,
+        keyFeatures: initialData.keyFeatures || [],
+        specifications: initialData.specifications || {},
+        image: initialData.image,
+        brochureUrl: initialData.brochureUrl,
+      };
+    }
+    
+    return {
+      name: "",
+      model: null,
+      description: "",
+      categoryId: categories.length > 0 ? categories[0].id : 0,
+      keyFeatures: [],
+      specifications: {},
+      image: "",
+      brochureUrl: null,
+    };
+  });
+  
+  // UI state for dynamic rows
   const [keyFeatureRows, setKeyFeatureRows] = useState<{id: number, value: string}[]>([{id: 1, value: ""}]);
   const [specRows, setSpecRows] = useState<SpecRow[]>([{id: 1, key: "", value: ""}]);
-  const router = useRouter();
 
+  // Initialize rows from existing data
   useEffect(() => {
     if (initialData) {
-      setFormData(initialData);
-      
       // Initialize key feature rows from existing data
       if (initialData.keyFeatures && initialData.keyFeatures.length > 0) {
         const features = initialData.keyFeatures.map((feature, index) => ({
@@ -95,26 +133,77 @@ export default function ProductForm({
         const specs = Object.entries(initialData.specifications).map(([key, value], index) => ({
           id: index + 1,
           key,
-          value: value as string
+          value
         }));
         setSpecRows(specs);
       }
     }
   }, [initialData]);
 
+  // Validate the form data
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    
+    // Step 1 validation
+    if (currentStep === 0) {
+      if (!formData.name.trim()) {
+        newErrors.name = "Product name is required";
+      }
+      
+      if (!formData.description.trim()) {
+        newErrors.description = "Product description is required";
+      }
+      
+      if (!formData.categoryId) {
+        newErrors.categoryId = "Category is required";
+      }
+    }
+    
+    // Step 3 validation (Media)
+    if (currentStep === 2 && isLastStep) {
+      if (!formData.image) {
+        newErrors.image = "Product image is required";
+      }
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Form submission handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // If this is being used as a child component with callbacks
-    if (onSave) {
-      onSave(formData);
-    } else {
-      // In a real application, this would be an API call
-      console.log("Submitting product:", formData);
+    // Don't submit if image is currently uploading
+    if (uploadingImage) {
+      toast.error("Please wait for the image to finish uploading");
+      return;
+    }
+    
+    if (!validateForm()) {
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      if (isEditing && productId) {
+        // Update existing product
+        await adminUpdateProduct(productId, formData);
+        toast.success("Product updated successfully");
+      } else {
+        // Create new product
+        await adminCreateProduct(formData);
+        toast.success("Product created successfully");
+      }
       
-      toast.success(isEditing ? "Product updated successfully" : "Product created successfully");
-      // This would navigate back to the products page if not using callbacks
-      // router.push("/admin/products");
+      router.push("/admin/products");
+      router.refresh();
+    } catch (error: any) {
+      console.error("Error saving product:", error);
+      toast.error(error.message || "Failed to save product");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -125,36 +214,52 @@ export default function ProductForm({
       ...prev,
       [name]: value
     }));
+    
+    // Clear error for this field if it exists
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   // Handle category select change
   const handleCategoryChange = (value: string) => {
+    const categoryId = parseInt(value, 10);
     setFormData(prev => ({
       ...prev,
-      category: value as "Printers" | "Safes" | "Lockers"
+      categoryId
     }));
+    
+    // Clear error for this field if it exists
+    if (errors.categoryId) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.categoryId;
+        return newErrors;
+      });
+    }
   };
 
   // Handle key feature change
   const handleKeyFeatureChange = (id: number, value: string) => {
-    setKeyFeatureRows(prev => 
-      prev.map(row => row.id === id ? { ...row, value } : row)
-    );
-    
-    // Update formData with all current features
-    updateKeyFeaturesInFormData();
-  };
-
-  // Update formData with current key features
-  const updateKeyFeaturesInFormData = () => {
-    const features = keyFeatureRows
-      .map(row => row.value.trim())
-      .filter(feature => feature !== "");
+    setKeyFeatureRows(prev => {
+      const updatedRows = prev.map(row => row.id === id ? { ...row, value } : row);
       
-    setFormData(prev => ({
-      ...prev,
-      keyFeatures: features
-    }));
+      // Update formData immediately with the changed values
+      const features = updatedRows
+        .map(row => row.value.trim())
+        .filter(feature => feature !== "");
+        
+      setFormData(currentFormData => ({
+        ...currentFormData,
+        keyFeatures: features
+      }));
+      
+      return updatedRows;
+    });
   };
 
   // Add new key feature row
@@ -162,42 +267,52 @@ export default function ProductForm({
     const newId = keyFeatureRows.length > 0 
       ? Math.max(...keyFeatureRows.map(row => row.id)) + 1 
       : 1;
+    
     setKeyFeatureRows(prev => [...prev, { id: newId, value: "" }]);
+    
+    // No immediate update to formData needed here since the new row is empty
+    // We'll wait for the user to input data before updating formData
   };
 
   // Remove key feature row
   const removeKeyFeatureRow = (id: number) => {
-    setKeyFeatureRows(prev => prev.filter(row => row.id !== id));
-    
-    // Update formData after removing the row
-    setTimeout(updateKeyFeaturesInFormData, 0);
+    setKeyFeatureRows(prev => {
+      const updatedRows = prev.filter(row => row.id !== id);
+      
+      // Update formData immediately with the filtered rows
+      const features = updatedRows
+        .map(row => row.value.trim())
+        .filter(feature => feature !== "");
+        
+      setFormData(currentFormData => ({
+        ...currentFormData,
+        keyFeatures: features
+      }));
+      
+      return updatedRows;
+    });
   };
 
   // Handle specification key-value pair change
   const handleSpecChange = (id: number, field: 'key' | 'value', newValue: string) => {
-    setSpecRows(prev => 
-      prev.map(row => row.id === id ? { ...row, [field]: newValue } : row)
-    );
-    
-    // Update formData specifications
-    updateSpecificationsInFormData();
-  };
-
-  // Update formData with current specifications
-  const updateSpecificationsInFormData = () => {
-    // FIX: Changed from empty object to Record<string, string> for proper type safety
-    const specs: Record<string, string> = {};
-    
-    specRows.forEach(row => {
-      if (row.key.trim() !== '') {
-        specs[row.key] = row.value;
-      }
+    setSpecRows(prev => {
+      const updatedRows = prev.map(row => row.id === id ? { ...row, [field]: newValue } : row);
+      
+      // Update formData immediately with the changed values
+      const specs: Record<string, string> = {};
+      updatedRows.forEach(row => {
+        if (row.key.trim() !== '') {
+          specs[row.key.trim()] = row.value.trim();
+        }
+      });
+      
+      setFormData(currentFormData => ({
+        ...currentFormData,
+        specifications: specs
+      }));
+      
+      return updatedRows;
     });
-    
-    setFormData(prev => ({
-      ...prev,
-      specifications: specs
-    }));
   };
 
   // Add new specification row
@@ -205,27 +320,41 @@ export default function ProductForm({
     const newId = specRows.length > 0 
       ? Math.max(...specRows.map(row => row.id)) + 1 
       : 1;
+    
     setSpecRows(prev => [...prev, { id: newId, key: "", value: "" }]);
+    
+    // No immediate update to formData needed here since the new row is empty
+    // We'll wait for the user to input data before updating formData
   };
 
   // Remove specification row
   const removeSpecRow = (id: number) => {
-    setSpecRows(prev => prev.filter(row => row.id !== id));
-    
-    // Update formData after removing the row
-    setTimeout(updateSpecificationsInFormData, 0);
+    setSpecRows(prev => {
+      const updatedRows = prev.filter(row => row.id !== id);
+      
+      // Update formData immediately with the filtered rows
+      const specs: Record<string, string> = {};
+      updatedRows.forEach(row => {
+        if (row.key.trim() !== '') {
+          specs[row.key.trim()] = row.value.trim();
+        }
+      });
+      
+      setFormData(currentFormData => ({
+        ...currentFormData,
+        specifications: specs
+      }));
+      
+      return updatedRows;
+    });
   };
 
   const handleCancel = () => {
-    if (onCancel) {
-      onCancel();
-    } else {
-      router.push("/admin/products");
-    }
+    router.push("/admin/products");
   };
 
   const goToNextStep = () => {
-    if (currentStep < steps.length - 1) {
+    if (validateForm() && currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
       window.scrollTo(0, 0);
     }
@@ -238,38 +367,49 @@ export default function ProductForm({
     }
   };
 
+  // Handle image upload complete
+  const handleImageUpload = (url: string) => {
+    setFormData(prev => ({
+      ...prev,
+      image: url
+    }));
+    
+    // Clear image error if it exists
+    if (errors.image) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.image;
+        return newErrors;
+      });
+    }
+    
+    // Reset uploading state
+    setUploadingImage(false);
+  };
+
   const isLastStep = currentStep === steps.length - 1;
   const isFirstStep = currentStep === 0;
 
   return (
     <div className="container mx-auto py-8 w-full">
       <div className="flex items-center justify-between mb-6">
-        {onCancel ? (
-          <div className="flex items-center">
-            <Button variant="outline" size="icon" onClick={handleCancel} className="mr-4">
-              <X className="h-4 w-4" />
+        <div className="flex items-center">
+          <Link href="/admin/products" className="mr-1 md:mr-4">
+            <Button variant="outline" size="icon">
+              <ChevronLeft className="h-4 w-4" />
             </Button>
-            <h1 className="text-2xl font-bold">
-              {isEditing ? "Edit Product" : "Add New Product"}
-            </h1>
-          </div>
-        ) : (
-          <div className="flex items-center">
-            <Link href="/admin/products" className="mr-4">
-              <Button variant="outline" size="icon">
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-            </Link>
-            <h1 className="text-2xl font-bold">
-              {isEditing ? "Edit Product" : "Add New Product"}
-            </h1>
-          </div>
-        )}
+          </Link>
+          <h1 className="text-2xl font-bold text-red-600">
+            {isEditing ? "Edit Product" : "Add New Product"}
+          </h1>
+        </div>
 
-        {isEditing && onSave && (
-          <Button 
+        {isEditing && (
+          <Button
+          variant={'outline'}
             onClick={handleSubmit} 
             className="flex items-center"
+            disabled={isSubmitting || uploadingImage}
           >
             <Save className="mr-2 h-4 w-4" />
             Save Changes
@@ -279,7 +419,7 @@ export default function ProductForm({
 
       <Card className="shadow-lg">
         <CardHeader className="pb-0">
-          {/* Step progress indicator - removed description */}
+          {/* Step progress indicator */}
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-lg font-medium">
@@ -297,53 +437,68 @@ export default function ProductForm({
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Product Name</Label>
+                    <Label htmlFor="name" className="flex items-center">
+                      Product Name <span className="text-red-500 ml-1">*</span>
+                    </Label>
                     <Input
                       id="name"
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      required
+                      className={errors.name ? "border-red-500" : ""}
                     />
+                    {errors.name && (
+                      <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="model">Model Number</Label>
                     <Input
                       id="model"
                       name="model"
-                      value={formData.model}
+                      value={formData.model || ""}
                       onChange={handleInputChange}
-                      required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="category">Category</Label>
+                    <Label htmlFor="category" className="flex items-center">
+                      Category <span className="text-red-500 ml-1">*</span>
+                    </Label>
                     <Select
-                      name="category" 
-                      value={formData.category}
+                      value={formData.categoryId.toString()}
                       onValueChange={handleCategoryChange}
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className={`w-full ${errors.categoryId ? "border-red-500" : ""}`}>
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
-                      <SelectContent className='w-full'>
-                        <SelectItem value="Printers">Printers</SelectItem>
-                        <SelectItem value="Safes">Safes</SelectItem>
-                        <SelectItem value="Lockers">Lockers</SelectItem>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id.toString()}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
+                    {errors.categoryId && (
+                      <p className="text-red-500 text-sm mt-1">{errors.categoryId}</p>
+                    )}
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description" className="flex items-center">
+                    Description <span className="text-red-500 ml-1">*</span>
+                  </Label>
                   <Textarea
                     id="description"
                     name="description"
                     rows={5}
-                    value={formData.description || ''}
+                    value={formData.description}
                     onChange={handleInputChange}
-                    required
+                    className={errors.description ? "border-red-500" : ""}
                   />
+                  {errors.description && (
+                    <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+                  )}
                 </div>
               </div>
             )}
@@ -441,7 +596,7 @@ export default function ProductForm({
               </div>
             )}
             
-            {/* Step 3: Media (former Step 4) */}
+            {/* Step 3: Media */}
             {currentStep === 2 && (
               <div className="space-y-6">
                 <div className="space-y-2">
@@ -449,7 +604,7 @@ export default function ProductForm({
                   <Input
                     id="brochureUrl"
                     name="brochureUrl"
-                    value={formData.brochureUrl || ''}
+                    value={formData.brochureUrl || ""}
                     onChange={handleInputChange}
                     placeholder="https://example.com/brochures/product-name.pdf"
                   />
@@ -458,8 +613,35 @@ export default function ProductForm({
                 <Separator className="my-6" />
                 
                 <div className="space-y-2">
-                  <Label>Product Images</Label>
-                  <ImageUpload />
+                  <Label className="flex items-center">
+                    Product Image <span className="text-red-500 ml-1">*</span>
+                  </Label>
+                  {errors.image && (
+                    <Alert variant="destructive" className="mb-4">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>{errors.image}</AlertDescription>
+                    </Alert>
+                  )}
+                  
+                  {formData.image && (
+                    <div className="mb-4">
+                      <p className="text-sm text-gray-500 mb-2">Current image:</p>
+                      <div className="w-40 h-40 relative border rounded-md overflow-hidden">
+                        <img 
+                          src={formData.image} 
+                          alt={formData.name} 
+                          className="object-cover w-full h-full"
+                        />
+                      </div>
+                    </div>
+                  )}
+                  
+                  <ImageUpload 
+                    folder="products"
+                    currentImageUrl={formData.image}
+                    onUploadComplete={handleImageUpload}
+                    onUploadStart={() => setUploadingImage(true)}
+                  />
                 </div>
               </div>
             )}
@@ -471,24 +653,32 @@ export default function ProductForm({
             type="button" 
             variant="outline"
             onClick={isFirstStep ? handleCancel : goToPreviousStep}
+            disabled={isSubmitting}
           >
             {isFirstStep ? "Cancel" : "Back"}
           </Button>
           
           <div className="flex gap-2">
             {!isLastStep ? (
-              <Button type="button" onClick={goToNextStep} className="flex items-center" variant="destructive">
+              <Button 
+                type="button" 
+                onClick={goToNextStep} 
+                className="flex items-center" 
+                variant="outline"
+                disabled={isSubmitting}
+              >
                 Next
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             ) : (
-              <>
-                {!onSave && (
-                  <Button type="submit" onClick={handleSubmit} variant="destructive">
-                    {isEditing ? "Update Product" : "Create Product"}
-                  </Button>
-                )}
-              </>
+              <Button 
+                type="submit" 
+                onClick={handleSubmit} 
+                variant="outline"
+                disabled={isSubmitting || uploadingImage}
+              >
+                {isSubmitting ? "Saving..." : (isEditing ? "Update Product" : "Create Product")}
+              </Button>
             )}
           </div>
         </CardFooter>
