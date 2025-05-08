@@ -16,6 +16,11 @@ type UserData = {
   role: string;
 }
 
+// Capitalize the first letter of a string
+function capitalizeFirstLetter(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 // Simplified data structure for admin dashboard
 const dashboardData = {
   sections: [
@@ -67,7 +72,7 @@ export function AppSidebar({ user, loading = false, ...props }: AppSidebarProps)
           </div>
         ) : user ? (
           <NavUser user={{
-            name: user.displayName,
+            name: capitalizeFirstLetter(user.displayName),
             email: user.email,
             avatar: user.image || '',
             role: user.role
