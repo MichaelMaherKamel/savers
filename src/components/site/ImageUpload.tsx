@@ -143,7 +143,7 @@ export function ImageUpload({
     <FileUpload
       value={files}
       onValueChange={setFiles}
-      maxFiles={10}
+      maxFiles={1}
       maxSize={5 * 1024 * 1024}
       accept="image/*"
       className="w-full max-w-md"
