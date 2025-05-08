@@ -103,7 +103,7 @@ Password: Hello1
 The admin dashboard provides complete control over:
 
 - **Categories Management** - Create, edit, and delete product categories
-- **Products Management** - Add new products, update details, manage inventory
+- **Products Management** - Add new products, update details
 - **User Management** - Add new users, change roles, reset passwords, and delete accounts
 
 ## 📦 Project Structure
