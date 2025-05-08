@@ -373,7 +373,11 @@ async function ProductDetails({ productId }: { productId: number }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {similarProducts.length > 0 ? (
             similarProducts.map((item) => {
-              // For each similar product, fetch its category
+              // Find the category name for this similar product
+              const similarProductCategory = categoryResponse.category && 
+                item.categoryId === product.categoryId ? 
+                categoryName : "Product";
+              
               return (
                 <ProductCard
                   key={item.id.toString()}
@@ -381,7 +385,7 @@ async function ProductDetails({ productId }: { productId: number }) {
                   title={item.name}
                   description={item.description}
                   image={item.image || "/placeholder.svg"}
-                  category={item.categoryId}
+                  category={similarProductCategory} // Now passing a string (category name) instead of a number
                 />
               );
             })
