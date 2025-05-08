@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Link from 'next/link'
 import ProductsGrid from '@/components/products/ProductsGrid'
 import ProductsSkeletonLoader from '@/components/products/ProductsSkeletonLoader'
+import { adminGetCategories } from '@/db/actions/categories'
 
 // Main Products Page component
 export default async function ProductsPage({
@@ -14,6 +15,9 @@ export default async function ProductsPage({
   // Get category from URL params or default to 'all'
   const params = await searchParams;
   const category = params.cat?.toLowerCase() || 'all';
+  
+  // Fetch categories from the database
+  const categoriesList = await adminGetCategories();
 
   return (
     <div className='bg-gradient-to-b from-white to-gray-50 min-h-screen flex flex-col'>
@@ -28,7 +32,7 @@ export default async function ProductsPage({
             </p>
           </div>
 
-          {/* Tabs Section - Now using server-based navigation */}
+          {/* Tabs Section - Now using dynamic categories from the database */}
           <Tabs defaultValue={category} className='mb-16'>
             <div className='flex justify-center mb-8'>
               <TabsList className='bg-white border border-gray-100 shadow-sm p-1 w-full max-w-md mx-auto'>
@@ -39,27 +43,20 @@ export default async function ProductsPage({
                 >
                   <Link href="/products" prefetch={true}>All</Link>
                 </TabsTrigger>
-                <TabsTrigger
-                  value='safes'
-                  asChild
-                  className='flex-1 px-4 py-3 data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=active]:shadow-sm'
-                >
-                  <Link href="/products?cat=safes" prefetch={true}>Safes</Link>
-                </TabsTrigger>
-                <TabsTrigger
-                  value='lockers'
-                  asChild
-                  className='flex-1 px-4 py-3 data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=active]:shadow-sm'
-                >
-                  <Link href="/products?cat=lockers" prefetch={true}>Lockers</Link>
-                </TabsTrigger>
-                <TabsTrigger
-                  value='printers'
-                  asChild
-                  className='flex-1 px-4 py-3 data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=active]:shadow-sm'
-                >
-                  <Link href="/products?cat=printers" prefetch={true}>Printers</Link>
-                </TabsTrigger>
+                
+                {/* Map through the categories from the database */}
+                {categoriesList.map((cat) => (
+                  <TabsTrigger
+                    key={cat.id}
+                    value={cat.name.toLowerCase()}
+                    asChild
+                    className='flex-1 px-4 py-3 data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=active]:shadow-sm'
+                  >
+                    <Link href={`/products?cat=${cat.name.toLowerCase()}`} prefetch={true}>
+                      {cat.name}
+                    </Link>
+                  </TabsTrigger>
+                ))}
               </TabsList>
             </div>
 

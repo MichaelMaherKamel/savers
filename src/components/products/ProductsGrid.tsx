@@ -9,23 +9,23 @@ export default async function ProductsGrid({ category }: { category: string }) {
   try {
     // Get all products
     const allProducts = await getAllProducts();
-   
+    
     // Get all categories
     const allCategories: Category[] = await getCategories();
-   
+    
     if (allCategories.length === 0) {
       console.warn('No categories were found in the database');
     }
-   
+    
     // Filter products based on category
     let filteredProducts = allProducts;
-   
+    
     if (category !== 'all') {
       // Find the category ID by name
       const categoryObj = allCategories.find(
         cat => cat.name.toLowerCase() === category.toLowerCase()
       );
-     
+      
       if (categoryObj) {
         // Filter products by the found category ID
         filteredProducts = allProducts.filter(product => product.categoryId === categoryObj.id);
@@ -34,19 +34,19 @@ export default async function ProductsGrid({ category }: { category: string }) {
         filteredProducts = [];
       }
     }
-   
+    
     // Map products to include a category name property for display
     const productsWithCategories = filteredProducts.map(product => {
       // Find the category name for this product's categoryId
       const categoryObj = allCategories.find(cat => cat.id === product.categoryId);
       const categoryName = categoryObj ? categoryObj.name : 'Other';
-     
+      
       return {
         ...product,
-        category: categoryName
+        categoryName // Renamed from 'category' to 'categoryName' to avoid confusion
       };
     });
-   
+    
     if (productsWithCategories.length === 0) {
       return (
         <div className="text-center py-4 flex flex-col justify-center">
@@ -57,7 +57,7 @@ export default async function ProductsGrid({ category }: { category: string }) {
         </div>
       );
     }
-   
+    
     return (
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8'>
         {productsWithCategories.map((product) => (
@@ -65,9 +65,9 @@ export default async function ProductsGrid({ category }: { category: string }) {
             key={product.id}
             id={product.id.toString()}
             title={product.name}
-            description={product.description} // Changed from productDescription to description
+            description={product.description}
             image={product.image}
-            category={product.categoryId}
+            category={product.categoryName} // Changed from product.categoryId to product.categoryName
           />
         ))}
       </div>

@@ -9,13 +9,13 @@ interface ProductCardProps {
   title: string
   description: string
   image: string
-  category: number
+  category: string // Changed from number to string since we're now passing category name
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ id, title, description, image, category }) => {
   return (
     <Link href={`/products/${id}`}>
-      <Card className='group h-full overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-red-100 border border-gray-100 hover:border-red-200 '>
+      <Card className='group h-full overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-red-100 border border-gray-100 hover:border-red-200'>
         <div className='relative aspect-[4/3] w-full bg-gray-50'>
           {image ? (
             <Image
@@ -38,6 +38,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ id, title, description, image
               {title}
             </h3>
             <p className='text-gray-600 text-sm mb-4 line-clamp-2'>{description}</p>
+            {/* Optionally display the category name */}
+            <p className='text-xs text-gray-500 mb-3'>{category}</p>
           </div>
           <div className='flex items-center text-red-700 text-sm font-medium group-hover:translate-x-1 transition-transform'>
             <span>View Details</span>
