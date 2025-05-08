@@ -23,7 +23,7 @@ import {
 // Define a stronger password validation schema
 const passwordSchema = z
   .string()
-  .min(6, "Password must be at least 6 characters")
+  .min(6, "Must be at least 6 characters with one uppercase letter and one number.")
   .refine(
     (password) => /[A-Z]/.test(password),
     "Password must contain at least one uppercase letter"

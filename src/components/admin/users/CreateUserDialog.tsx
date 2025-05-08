@@ -44,10 +44,23 @@ const USER_ROLE = "user" as const;
 const ADMIN_ROLE = "admin" as const;
 type UserRole = typeof USER_ROLE | typeof ADMIN_ROLE;
 
+// Define a stronger password validation schema
+const passwordSchema = z
+  .string()
+  .min(6, "Must be at least 6 characters with one uppercase letter and one number.")
+  .refine(
+    (password) => /[A-Z]/.test(password),
+    "Password must contain at least one uppercase letter"
+  )
+  .refine(
+    (password) => /[0-9]/.test(password),
+    "Password must contain at least one number"
+  );
+
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: passwordSchema,
   username: z.string().min(3, "Username must be at least 3 characters").optional(),
   role: z.enum([USER_ROLE, ADMIN_ROLE]),
 });
@@ -191,7 +204,7 @@ export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDi
                     <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>
                   <FormDescription>
-                    Must be at least 8 characters.
+                    Must be at least 6 characters with one uppercase letter and one number.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

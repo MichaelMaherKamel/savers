@@ -14,6 +14,8 @@ Savers is a corporate portfolio website showcasing products and services for a c
 - **Responsive Design** - Optimized viewing experience across all device sizes
 - **Authentication System** - Secure user authentication powered by Better-Auth and Supabase
 - **Database Integration** - Robust data management with PostgreSQL and Drizzle ORM
+- **Admin Dashboard** - Powerful admin interface for managing Categories, Products, and Users
+- **User Management** - Complete user administration including password reset, role assignment, and user creation/deletion
 
 ## 💻 Tech Stack
 
@@ -81,6 +83,28 @@ DATABASE_URL=your_postgres_connection_string
    ```
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+
+## 🔑 Admin Access
+
+### Accessing the Admin Dashboard
+
+- **Development**: [http://localhost:3000/admin](http://localhost:3000/admin)
+- **Production**: [https://savers.macrotech.dev/admin](https://savers.macrotech.dev/admin)
+
+### Default Admin Credentials
+
+```
+Username: admin
+Password: Hello1
+```
+
+### Admin Features
+
+The admin dashboard provides complete control over:
+
+- **Categories Management** - Create, edit, and delete product categories
+- **Products Management** - Add new products, update details, manage inventory
+- **User Management** - Add new users, change roles, reset passwords, and delete accounts
 
 ## 📦 Project Structure
 
@@ -171,8 +195,6 @@ npm run start
 ## 📄 License
 
 [MIT](LICENSE)
-
-
 
 ## 📞 Contact
 
