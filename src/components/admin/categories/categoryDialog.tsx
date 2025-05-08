@@ -236,7 +236,7 @@ export function CategoryDialog({
               <Button 
                 type="submit" 
                 disabled={isSubmitting || isImageUploading}
-                className="bg-red-600 hover:bg-red-700 text-white"
+                variant={'general'}
               >
                 {isSubmitting ? (
                   <>

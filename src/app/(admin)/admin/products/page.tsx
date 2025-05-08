@@ -1,21 +1,30 @@
 import { Suspense } from "react";
-import ProductsList from "@/components/products/ProductsList";
+import ProductsTable from "@/components/admin/products/ProductsTable";
+import ProductsTableSkeleton from "@/components/admin/products/ProductsTableSkeleton";
 import { adminGetAllProducts } from "@/db/actions/products";
 import { getCategories } from "@/db/actions/categories";
 
-export default async function AdminProductsPage() {
+export default function AdminProductsPage() {
+  return (
+    <main>
+      <Suspense fallback={<ProductsTableSkeleton />}>
+        <ProductsTableContent />
+      </Suspense>
+    </main>
+  );
+}
+
+// Separate server component to fetch data
+async function ProductsTableContent() {
   const [products, categories] = await Promise.all([
     adminGetAllProducts(),
     getCategories()
   ]);
+  
   return (
-    <main>
-      <Suspense fallback={<div className="p-8 text-center">Loading products...</div>}>
-      <ProductsList 
+    <ProductsTable
       initialProducts={products}
       categories={categories}
     />
-      </Suspense>
-    </main>
   );
 }

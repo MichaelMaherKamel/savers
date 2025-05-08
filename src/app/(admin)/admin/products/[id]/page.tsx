@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import dynamic from "next/dynamic";
 
 // Dynamically import the client component
-const AdminProductView = dynamic(() => import("@/components/products/AdminProductView"), {
+const AdminProductView = dynamic(() => import("@/components/admin/products/AdminProductView"), {
   ssr: true
 });
 

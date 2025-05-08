@@ -22,6 +22,7 @@ export const user = pgTable("user", {
   updatedAt: timestamp('updated_at').notNull()
 });
 
+
 export const session = pgTable("session", {
   id: text('id').primaryKey(),
   expiresAt: timestamp('expires_at').notNull(),
@@ -57,6 +58,9 @@ export const verification = pgTable("verification", {
   createdAt: timestamp('created_at'),
   updatedAt: timestamp('updated_at')
 });
+
+export type User = typeof user.$inferSelect;
+export type Session = typeof session.$inferSelect;
 
 
 // Categories Table

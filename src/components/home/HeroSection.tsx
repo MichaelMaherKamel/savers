@@ -70,7 +70,7 @@ const HeroSection = () => {
                           index === currentImage ? 'opacity-100' : 'opacity-0'
                         }`}
                       >
-                        <img src={img.src} alt={img.alt} className='w-full h-full object-cover' />
+                        <img  loading={'lazy'} src={img.src} alt={img.alt} className='w-full h-full object-cover' />
                         <div className='absolute inset-0 bg-gradient-to-br from-red-300/20 to-indigo-400/20'></div>
                       </div>
                     ))}

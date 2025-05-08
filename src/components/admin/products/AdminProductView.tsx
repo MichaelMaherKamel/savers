@@ -77,7 +77,7 @@ export default function AdminProductView({ product, categories, category }: Prod
             </Button>
           )}
           <Button
-            variant={'destructive'}
+            variant={'general'}
             onClick={() => setIsEditing(true)} 
             className="flex items-center"
           >
@@ -96,6 +96,7 @@ export default function AdminProductView({ product, categories, category }: Prod
               <img
                 src={currentProduct.image}
                 alt={currentProduct.name}
+                loading={'lazy'}
                 className="w-full h-full object-contain"
               />
             ) : (

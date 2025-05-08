@@ -65,6 +65,18 @@ export const getCategories = unstable_cache(
 );
 
 /**
+ * Admin Get all categories
+ */
+export const adminGetCategories = async (): Promise<Category[]> => {
+  try {
+    return await db.select().from(categories).orderBy(asc(categories.id));
+  } catch (error) {
+    console.error("Failed to fetch categories:", error);
+    throw new Error("Failed to fetch categories");
+  }
+};
+
+/**
  * Get a single category by ID
  */
 export async function getCategoryById(id: number) {

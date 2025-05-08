@@ -35,8 +35,8 @@ const dashboardData = {
       icon: Boxes,
     },
     {
-      name: 'Clients',
-      url: '/admin/clients',
+      name: 'Users',
+      url: '/admin/users',
       icon: Users,
     },
   ],

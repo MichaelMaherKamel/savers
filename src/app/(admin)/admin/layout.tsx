@@ -87,7 +87,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       <AppSidebar user={userData} />
       <SidebarInset>
         <SidebarBreadcrumb />
-        <div className='flex flex-1 flex-col gap-4 p-4 pt-0'>
+        <div className='flex flex-1 flex-col gap-4 p-4 pt-0 bg-slate-50'>
           {children}
         </div>
       </SidebarInset>

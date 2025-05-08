@@ -19,11 +19,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ id, title, description, image
         <div className='relative aspect-[4/3] w-full bg-gray-50'>
           {image ? (
             <Image
-              src={image || '/placeholder.svg'}
-              alt={title}
               fill
-              className='object-cover transition-transform duration-300 group-hover:scale-105'
+              alt={title}
+              loading={'lazy'}
               priority={false}
+              src={image || '/placeholder.svg'}
+              className='object-cover transition-transform duration-300 group-hover:scale-105'
             />
           ) : (
             <div className='flex h-full items-center justify-center bg-gray-100'>

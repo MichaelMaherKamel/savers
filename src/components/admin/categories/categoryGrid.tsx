@@ -5,8 +5,8 @@ import { Category } from "@/db/schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash, MoreHorizontal } from "lucide-react";
-import { CategoryDialog } from "@/components/categories/categoryDialog";
-import { DeleteCategoryDialog } from "@/components/categories/categoryDeleteDialog";
+import { CategoryDialog } from "@/components/admin/categories/categoryDialog";
+import { DeleteCategoryDialog } from "@/components/admin/categories/categoryDeleteDialog";
 import Image from "next/image";
 import {
   DropdownMenu,
@@ -62,6 +62,7 @@ export function CategoriesGrid({ initialCategories }: CategoriesGridProps) {
                 src={category.image}
                 alt={category.name}
                 fill
+                loading={'lazy'}
                 sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 className="object-cover object-center transform group-hover:scale-105 transition-transform duration-300"
               />

@@ -406,7 +406,7 @@ export default function ProductForm({
 
         {isEditing && (
           <Button
-          variant={'outline'}
+          variant={'general'}
             onClick={handleSubmit} 
             className="flex items-center"
             disabled={isSubmitting || uploadingImage}
@@ -664,7 +664,7 @@ export default function ProductForm({
                 type="button" 
                 onClick={goToNextStep} 
                 className="flex items-center" 
-                variant="outline"
+                variant="general"
                 disabled={isSubmitting}
               >
                 Next
@@ -674,7 +674,7 @@ export default function ProductForm({
               <Button 
                 type="submit" 
                 onClick={handleSubmit} 
-                variant="outline"
+                variant="general"
                 disabled={isSubmitting || uploadingImage}
               >
                 {isSubmitting ? "Saving..." : (isEditing ? "Update Product" : "Create Product")}

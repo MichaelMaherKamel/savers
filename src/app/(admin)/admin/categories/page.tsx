@@ -1,14 +1,14 @@
 import { Suspense } from "react";
-import { getCategories } from "@/db/actions/categories";
-import { CategoriesGrid } from "@/components/categories/categoryGrid";
-import { CreateCategoryButton } from "@/components/categories/createCategoryButton";
-import { CategoryGridSkeleton } from "@/components/categories/CategoryGridSkeleton";
+import { adminGetCategories } from "@/db/actions/categories";
+import { CategoriesGrid } from "@/components/admin/categories/categoryGrid";
+import { CreateCategoryButton } from "@/components/admin/categories/createCategoryButton";
+import { CategoryGridSkeleton } from "@/components/admin/categories/CategoryGridSkeleton";
 
 // This is the server component that loads the categories data
 async function CategoriesData() {
   try {
-    const categories = await getCategories();
-    
+    const categories = await adminGetCategories();
+   
     // Empty state
     if (!categories || categories.length === 0) {
       return (
@@ -18,7 +18,7 @@ async function CategoriesData() {
         </div>
       );
     }
-    
+   
     // Categories found state
     return (
       <CategoriesGrid initialCategories={categories} />

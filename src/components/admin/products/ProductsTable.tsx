@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Edit, File, Plus, Trash2 } from "lucide-react";
+import { Eye, File, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -28,15 +28,15 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-interface ProductsListProps {
+interface ProductsTableProps {
   initialProducts: Product[];
   categories: Category[];
 }
 
-export default function ProductsList({ 
+export default function ProductsTable({ 
   initialProducts, 
   categories 
-}: ProductsListProps) {
+}: ProductsTableProps) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [deleteLoading, setDeleteLoading] = useState<number | null>(null);
   const router = useRouter();
@@ -78,7 +78,7 @@ export default function ProductsList({
         <h1 className="text-3xl font-bold text-red-600">Products</h1>
         {products.length > 0 && (
           <Link href="/admin/products/new">
-            <Button variant="outline">
+            <Button variant="general">
               <Plus className="mr-2 h-4 w-4" /> Add New Product
             </Button>
           </Link>
@@ -90,12 +90,12 @@ export default function ProductsList({
         <div className="text-center py-10">
           <p className="text-gray-500 mb-4">No products found</p>
           <Link href="/admin/products/new">
-            <Button variant='destructive'>Add your first product</Button>
+            <Button variant='general'>Add your first product</Button>
           </Link>
         </div>
       ) : (
-        <div className="rounded-md border">
-          <Table>
+        <div className="rounded-md border border-gray-200">
+            <Table className="bg-white rounded-md">
             <TableHeader>
               <TableRow>
                 <TableHead>Image</TableHead>
@@ -114,6 +114,7 @@ export default function ProductsList({
                         <img
                           src={product.image}
                           alt={product.name}
+                          loading="lazy"
                           className="h-full w-full object-cover"
                         />
                       ) : (
@@ -148,7 +149,7 @@ export default function ProductsList({
                           size="icon"
                           title="Edit Product"
                         >
-                          <Edit className="h-4 w-4" />
+                          <Eye className="h-4 w-4" />
                         </Button>
                       </Link>
                       

@@ -34,7 +34,7 @@ export function CreateCategoryButton({
       <>
         <Button
           size="lg"
-          className="bg-red-600 hover:bg-red-700 text-white px-6 py-6"
+          variant={'general'}
           onClick={() => setIsDialogOpen(true)}
         >
           <PlusCircle className="mr-2 h-5 w-5" />
@@ -54,7 +54,7 @@ export function CreateCategoryButton({
   return (
     <>
       <Button
-        variant="outline"
+        variant="general"
         onClick={() => setIsDialogOpen(true)}
       >
         <PlusCircle className="mr-2 h-4 w-4" />
