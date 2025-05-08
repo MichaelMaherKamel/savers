@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Link from 'next/link'
 import ProductsGrid from '@/components/products/ProductsGrid'
 import ProductsSkeletonLoader from '@/components/products/ProductsSkeletonLoader'
-import { adminGetCategories } from '@/db/actions/categories'
+import { getCategories } from '@/db/actions/categories'
 
 // Main Products Page component
 export default async function ProductsPage({
@@ -17,7 +17,7 @@ export default async function ProductsPage({
   const category = params.cat?.toLowerCase() || 'all';
   
   // Fetch categories from the database
-  const categoriesList = await adminGetCategories();
+  const categoriesList = await getCategories();
 
   return (
     <div className='bg-gradient-to-b from-white to-gray-50 min-h-screen flex flex-col'>
