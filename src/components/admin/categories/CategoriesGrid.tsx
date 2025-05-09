@@ -5,9 +5,9 @@ import { Category } from "@/db/schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash, MoreHorizontal } from "lucide-react";
-import { DeleteCategoryDialog } from "@/components/admin/categories/CategoryDeleteDialog";
+import { DeleteCategoryDialog } from "@/components/admin/categories/CategoriesDeleteDialog";
 import { CategoryCard } from "@/components/admin/categories/CategoryCard";
-import { CreateCategoryButton } from "@/components/admin/categories/CreateCategoryButton";
+import { CreateCategoryButton } from "@/components/admin/categories/CreateCategoriesButton";
 import Image from "next/image";
 import {
   DropdownMenu,
