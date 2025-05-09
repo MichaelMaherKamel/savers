@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { adminGetCategories } from "@/db/actions/categories";
-import { CategoriesGrid } from "@/components/admin/categories/CategoryGrid";
+import { CategoriesGrid } from "@/components/admin/categories/CategoriesGrid";
 import { CategoryGridSkeleton } from "@/components/admin/categories/CategoryGridSkeleton";
 
 // This is the server component that loads the categories data
