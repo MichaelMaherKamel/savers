@@ -47,7 +47,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { authClient } from "@/lib/better-auth/auth-client";
-import { CreateUserDialog } from "./CreateUserDialog";
+import { CreateUserCard } from "./CreateUserCard";
 import { PasswordResetCard } from "./PasswordResetCard";
 import { ViewUserCard } from "./ViewUserCard";
 import UsersTableSkeleton from "./UsersTableSkeleton";
@@ -95,7 +95,7 @@ const fetcher = async () => {
 
 export default function UsersTable({ currentUserId }: UsersTableProps) {
   const { data: users, error, mutate } = useSWR<User[]>('admin/users', fetcher);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [passwordResetUserId, setPasswordResetUserId] = useState<string | null>(null);
   const [viewUserId, setViewUserId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
@@ -114,36 +114,50 @@ export default function UsersTable({ currentUserId }: UsersTableProps) {
     ? users?.find(user => user.id === viewUserId)
     : null;
     
-  // Check if we're in a detail view (either password reset or user view)
-  const isInDetailView = Boolean(passwordResetUserId || viewUserId);
+  // Check if we're in a detail view (either password reset, user view, or creating a user)
+  const isInDetailView = Boolean(passwordResetUserId || viewUserId || isCreatingUser);
 
   // Handle user creation
-  const handleCreateUser = async () => {
+  const handleCreateUser = async (user: User) => {
     // Refetch user data using SWR's mutate
     try {
       await mutate();
       toast.success("User created successfully");
+      setIsCreatingUser(false);
     } catch (error) {
       console.error("Error refreshing users after creation:", error);
       toast.success("User created successfully. Refresh the page to see updated list.");
+      setIsCreatingUser(false);
+    }
+  };
+
+  // Toggle user creation mode
+  const toggleCreateUser = (value: boolean) => {
+    setIsCreatingUser(value);
+    // Close other views if opening the create form
+    if (value) {
+      setPasswordResetUserId(null);
+      setViewUserId(null);
     }
   };
 
   // Toggle password reset for a user
   const togglePasswordReset = (userId: string | null) => {
     setPasswordResetUserId(userId);
-    // Close view mode if open
+    // Close other views if open
     if (userId !== null) {
       setViewUserId(null);
+      setIsCreatingUser(false);
     }
   };
 
   // Toggle user view
   const toggleUserView = (userId: string | null) => {
     setViewUserId(userId);
-    // Close password reset if open
+    // Close other views if open
     if (userId !== null) {
       setPasswordResetUserId(null);
+      setIsCreatingUser(false);
     }
   };
 
@@ -322,11 +336,19 @@ export default function UsersTable({ currentUserId }: UsersTableProps) {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-red-600">Users</h1>
         {!isInDetailView && (
-          <Button variant="general" onClick={() => setIsCreateDialogOpen(true)}>
+          <Button variant="general" onClick={() => toggleCreateUser(true)}>
             <UserPlus className="mr-2 h-4 w-4" /> Add New User
           </Button>
         )}
       </div>
+
+      {/* Create User Card */}
+      {isCreatingUser && (
+        <CreateUserCard
+          onCancel={() => toggleCreateUser(false)}
+          onSuccess={handleCreateUser}
+        />
+      )}
 
       {/* Password Reset Section */}
       {userResettingPassword && (
@@ -352,7 +374,7 @@ export default function UsersTable({ currentUserId }: UsersTableProps) {
           {users && users.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-gray-500 mb-4">No users found</p>
-              <Button variant="default" onClick={() => setIsCreateDialogOpen(true)}>
+              <Button variant="default" onClick={() => toggleCreateUser(true)}>
                 <Plus className="mr-2 h-4 w-4" /> Create User
               </Button>
             </div>
@@ -531,13 +553,6 @@ export default function UsersTable({ currentUserId }: UsersTableProps) {
           )}
         </>
       )}
-
-      {/* Create User Dialog */}
-      <CreateUserDialog
-        open={isCreateDialogOpen}
-        onOpenChange={setIsCreateDialogOpen}
-        onSuccess={handleCreateUser}
-      />
     </div>
   );
 }

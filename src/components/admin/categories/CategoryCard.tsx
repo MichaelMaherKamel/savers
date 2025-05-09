@@ -8,15 +8,16 @@ import { Category } from "@/db/schema";
 import { ImageUpload } from "@/components/site/ImageUpload";
 import { toast } from "sonner";
 import { createCategory, updateCategory } from "@/db/actions/categories";
+import { ArrowLeft, X, Loader2 } from "lucide-react";
 
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 import {
   Form,
@@ -29,7 +30,6 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -38,21 +38,19 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-interface CategoryDialogProps {
+interface CategoryCardProps {
   mode: "create" | "edit";
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   category?: Category;
+  onCancel: () => void;
   onSuccess?: (category: Category) => void;
 }
 
-export function CategoryDialog({
+export function CategoryCard({
   mode,
-  open,
-  onOpenChange,
   category,
+  onCancel,
   onSuccess,
-}: CategoryDialogProps) {
+}: CategoryCardProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string>("");
   const [isImageUploading, setIsImageUploading] = useState(false);
@@ -60,27 +58,23 @@ export function CategoryDialog({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      image: "",
+      name: category?.name || "",
+      image: category?.image || "",
     }
   });
 
-  // Reset form when dialog opens/closes or when category changes
+  // Initialize form with category data if in edit mode
   useEffect(() => {
-    if (open) {
+    if (mode === "edit" && category) {
       form.reset({
-        name: category?.name || "",
-        image: category?.image || "",
+        name: category.name,
+        image: category.image,
       });
       
-      // If we're editing, set the uploaded image URL to the category's image
-      if (mode === "edit" && category?.image) {
-        setUploadedImageUrl(category.image);
-      } else {
-        setUploadedImageUrl("");
-      }
+      // Set the uploaded image URL to the category's image
+      setUploadedImageUrl(category.image);
     }
-  }, [open, category, form, mode]);
+  }, [category, form, mode]);
 
   // Update form value when image is uploaded
   useEffect(() => {
@@ -121,7 +115,6 @@ export function CategoryDialog({
           if (onSuccess) {
             onSuccess(result.category);
           }
-          onOpenChange(false);
           form.reset({
             name: "",
             image: "",
@@ -139,7 +132,6 @@ export function CategoryDialog({
           if (onSuccess) {
             onSuccess(result.category);
           }
-          onOpenChange(false);
         }
       }
     } catch (error) {
@@ -157,13 +149,32 @@ export function CategoryDialog({
   const submitLabel = mode === "create" ? "Create" : "Update";
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-
+    <Card className="w-full mb-6">
+      <CardHeader className="pb-3">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={onCancel} 
+              className="mr-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="sr-only">Back</span>
+            </Button>
+            <div>
+              <CardTitle className="text-xl font-medium">{title}</CardTitle>
+              <CardDescription>{description}</CardDescription>
+            </div>
+          </div>
+          <Button variant="ghost" size="icon" onClick={onCancel}>
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </Button>
+        </div>
+      </CardHeader>
+      
+      <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
@@ -223,34 +234,35 @@ export function CategoryDialog({
                 </FormItem>
               )}
             />
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting || isImageUploading}
-                variant={'general'}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  submitLabel
-                )}
-              </Button>
-            </DialogFooter>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+      </CardContent>
+
+      <CardFooter className="flex justify-end space-x-2 pt-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isSubmitting}
+        >
+          Cancel
+        </Button>
+        <Button 
+          type="submit" 
+          disabled={isSubmitting || isImageUploading}
+          variant={'general'}
+          onClick={form.handleSubmit(onSubmit)}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Submitting...
+            </>
+          ) : (
+            submitLabel
+          )}
+        </Button>
+      </CardFooter>
+    </Card>
   );
 }

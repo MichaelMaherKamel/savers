@@ -6,13 +6,15 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { User } from "@/db/schema";
-import { 
-  Dialog, 
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from "@/components/ui/dialog";
+import { ArrowLeft, X } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -33,16 +35,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/better-auth/auth-client";
 
-interface CreateUserDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+interface CreateUserCardProps {
+  onCancel: () => void;
   onSuccess: (user: User) => void;
 }
 
 // Define role types as constants for type safety
 const USER_ROLE = "user" as const;
 const ADMIN_ROLE = "admin" as const;
-type UserRole = typeof USER_ROLE | typeof ADMIN_ROLE;
 
 // Define a stronger password validation schema
 const passwordSchema = z
@@ -67,7 +67,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDialogProps) {
+export function CreateUserCard({ onCancel, onSuccess }: CreateUserCardProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<FormValues>({
@@ -120,9 +120,8 @@ export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDi
           updatedAt: new Date()
         });
         
-        // Reset form and close dialog
+        // Reset form
         form.reset();
-        onOpenChange(false);
       } else {
         // Handle error response
         if ('error' in response && response.error) {
@@ -141,12 +140,34 @@ export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDi
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Create New User</DialogTitle>
-        </DialogHeader>
-
+    <Card className="w-full mb-6">
+      <CardHeader className="pb-3">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={onCancel} 
+              className="mr-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="sr-only">Back</span>
+            </Button>
+            <div>
+              <CardTitle className="text-xl font-medium">Create New User</CardTitle>
+              <CardDescription>
+                Add a new user to the system
+              </CardDescription>
+            </div>
+          </div>
+          <Button variant="ghost" size="icon" onClick={onCancel}>
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </Button>
+        </div>
+      </CardHeader>
+      
+      <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-2">
             <FormField
@@ -238,23 +259,28 @@ export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDi
                 </FormItem>
               )}
             />
-
-            <DialogFooter className="pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={isLoading}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Creating..." : "Create User"}
-              </Button>
-            </DialogFooter>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+      </CardContent>
+      
+      <CardFooter className="flex justify-end space-x-2 pt-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isLoading}
+        >
+          Cancel
+        </Button>
+        <Button 
+          variant={'general'}
+          type="submit" 
+          disabled={isLoading}
+          onClick={form.handleSubmit(onSubmit)}
+        >
+          {isLoading ? "Creating..." : "Create User"}
+        </Button>
+      </CardFooter>
+    </Card>
   );
 }

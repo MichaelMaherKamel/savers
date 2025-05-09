@@ -152,7 +152,7 @@ export function PasswordResetCard({
           <Button variant="outline" onClick={onCancel} disabled={isSubmitting} type="button">
             Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button variant={'general'} type="submit" disabled={isSubmitting}>
             {isSubmitting ? "Saving..." : "Reset Password"}
           </Button>
         </CardFooter>
