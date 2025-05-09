@@ -172,7 +172,7 @@ export function CategoriesGrid({ initialCategories }: CategoriesGridProps) {
                               className="text-red-600 focus:text-red-600"
                             >
                               <Trash className="text-red-600 focus:text-red-600 mr-2 h-4 w-4" />
-                              <span>Delete</span>
+                              <span>Deletee</span>
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
